@@ -2,8 +2,8 @@
 
 EMPTY = 'О'
 BOX = '■'
-HIT = "X"
-MISS = "T"
+HIT = "‡"
+MISS = "-"
 
 # log(INFO, "I am in the weird function and a is", a, "and b is", b, "but I got a null C — using default", default_c)
 
@@ -79,9 +79,13 @@ from classes import Board
 ships = [[[(0,1), True], [(1,1), True]]]
 
 brd1 = Board("computer", ships)
-# print(brd1)
+# brd1.display_ships = False
+#
 brd1.cells[0][2] = MISS
+brd1.cells[0][1] = HIT
 # brd1.add_ship([(0, 0), (1, 0), (2, 0)])
 # print(brd1.to_str())
 # brd1.add_ship([(3,2), (3,3)])
 # print(brd1)
+# [print(cell) for cell in brd1.cells]
+print(brd1)
