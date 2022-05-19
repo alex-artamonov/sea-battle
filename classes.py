@@ -54,7 +54,7 @@ class Board():
             for cell in ship:
                 self.cells[cell[0]][cell[1]] = BOX
 
-    def __repr__(self):
+    def __repr__1(self):
         divider = " | "
         rng = range(1, 7)
         head = f"{self.player.center(25, '_')}\n    "
@@ -69,7 +69,7 @@ class Board():
             # s += "\n\n"
         s = head + s
         return s
-    def __repr__1(self):
+    def __repr__(self):
         divider = " | "
         rng = range(1, 7)
         head = f"{self.player.center(25, '_')}\n    "
@@ -79,7 +79,7 @@ class Board():
         for i, line in enumerate(self.cells):
             out = ""
             for cell in line:
-                out += (cell if self.display_ships and cell != BOX else EMPTY) + divider
+                out += (cell if self.display_ships or cell != BOX else EMPTY) + divider
             # s += str(i + 1) + "   " + divider.join(line) + "\n\n"
             # s += f"{str(i + 1)}   {divider.join(line)}\n" #   {' -- ' * 6}\n"
             s += str(i + 1) + '   ' + out + "\n"

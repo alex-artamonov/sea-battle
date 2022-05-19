@@ -76,7 +76,7 @@ from classes import Board
 
 # ships = [[(0, 0, True), (1, 0, True), (2, 0, True)], [(3,2, False), (3,3, False)], [(0,3, False), (1,3, False)], [(1,5, False)], [(5,0, False)]]
 
-ships = [[[(0,1), True], [(1,1), True]]]
+ships = [[[(0,1), True], [(1,1), True], [(2,1), True] ]]
 
 brd1 = Board("computer", ships)
 # brd1.display_ships = False
