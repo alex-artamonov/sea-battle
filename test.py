@@ -1,8 +1,11 @@
+
+
 EMPTY = 'О'
 BOX = '■'
 HIT = "X"
 MISS = "T"
 
+# log(INFO, "I am in the weird function and a is", a, "and b is", b, "but I got a null C — using default", default_c)
 
 def display_board(player):
     divider = " | "
@@ -81,4 +84,4 @@ brd1.cells[0][2] = MISS
 # brd1.add_ship([(0, 0), (1, 0), (2, 0)])
 # print(brd1.to_str())
 # brd1.add_ship([(3,2), (3,3)])
-print(brd1)
+# print(brd1)
