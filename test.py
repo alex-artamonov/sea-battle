@@ -79,8 +79,9 @@ s = "asdfdsa"
 
 # ships = [[[(0,1), True], [(1,1), True], [(2,1), True] ]]
 
-brd1 = Board("computer", ships)
-# brd1.display_ships = False
+brd1 = Board("computer", [])
+brd1.display_ships = True
+
 #
 brd1.cells[0][2] = MISS
 brd1.cells[0][1] = HIT

@@ -226,19 +226,20 @@ class Board:
         head = f"{self.player.center(25, '_')}\n    "
         head += "  ".join(str(i).rjust(2) for i in rng)
         head += "\n"
-        s = ""
+        output = ""
         for i, line in enumerate(self.cells):
-            out = ""
+            # out = ""
             for cell in line:
-                out += (cell if self.display_ships or cell != BOX else EMPTY) + divider
+                inner = ((cell if self.display_ships or cell != BOX else EMPTY) for cell in line)
+                inner = divider.join(inner)
             # s += str(i + 1) + "   " + divider.join(line) + "\n\n"
             # s += f"{str(i + 1)}   {divider.join(line)}\n" #   {' -- ' * 6}\n"
-            s += str(i + 1) + '   ' + out + "\n"
+            output += str(i + 1).rjust(2) + '   ' + inner + "\n"
 
             # s += divider.join(line)
             # s += "\n\n"
-        s = head + s
-        return s
+        output = head + output
+        return output
         
     def fire(self, cell):
         pass
