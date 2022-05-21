@@ -100,7 +100,7 @@ point = tuple("fd t".split())
 
 #
 sh = Ship(4, choice(["V", "H"]))
-sh1 = Ship(4, choice(["V", "H"]))
+sh1 = Ship(2, choice(["V", "H"]))
 # sh.front = (2,3)
 # print(sh)
 # sh.body[1] = HIT
@@ -126,6 +126,7 @@ print(brd1.cells, brd1.coords, brd1.coords_set )
 print(brd1)
 print("brd1.occupied:\t\t", brd1.occupied)
 print("brd1.occupied_set:\t", brd1.occupied_set())
+print(sh1.buffer_cells_set)
 # target = []
 # for i, elem in enumerate(ls):
 #     target += [(e, i, j) for j, e in enumerate(elem) if e in ('‡', '-')]

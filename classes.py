@@ -98,6 +98,31 @@ class Ship:
                  f"- Жизней: {self.nbr_lives}/{self.len}"
         return output
 
+    @property
+    def buffer_cells_set(self):
+        sb = self.coords_set
+        print(sb)
+        # if self.direction == "H"
+        #     _set = {}
+        #     pass
+        # elif self.direction == "V":
+        #     pass
+        # else:
+        #     raise ValueError("Введено неправильное направление корабля!")
+        # формируем окружающие (буферные) координаты:
+        _set = set()
+        for coord in sb:
+            x, y = coord[0], coord[1]
+            _set = _set | {
+                    (x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
+                    (x - 1, y),                 (x + 1, y),
+                    (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
+            }
+        _set -= sb
+        return _set
+
+
+
 # ========================================================================
 class Board:
     """Игровое поле
@@ -222,7 +247,8 @@ class Board:
     def __repr__(self):
         """Формирует строку с изображением поля"""
         divider = " | "
-        rng = range(1, self._side + 1)
+        # rng = range(1, self._side + 1) # временно для тестирования
+        rng = range(0, self._side)  # временно для тестирования
         head = f"{self.player.center(25, '_')}\n    "
         head += "  ".join(str(i).rjust(2) for i in rng)
         head += "\n"
