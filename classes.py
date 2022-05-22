@@ -1,10 +1,12 @@
 from random import choice
-EMPTY = 'О'
-# EMPTY = " "
-BOX = '■'
+import exceptions
+
+# EMPTY = 'О'
+EMPTY = " "
+BODY = '■'
 DAGGER = '†'
 HIT = "‡"
-
+BUFFER = "B"
 
 # =======================================
 class Point:
@@ -28,8 +30,8 @@ class Ship:
         - массив точек (body)
     """
 
-    def __init__(self, length, direction="H", board_size=6):
-        self._front = ()
+    def __init__(self, length, direction="H", front=(), board_size=6):
+        self._front = front
         self.direction = direction
         self.board_size = board_size
         self._max_len = 4
@@ -37,7 +39,7 @@ class Ship:
         # self.nbr_lives = len
         self._body = []
         for _ in range(self._len):
-            self._body.append(BOX)
+            self._body.append(BODY)
 
     @property
     def len(self):
@@ -81,7 +83,7 @@ class Ship:
 
     @property
     def nbr_lives(self):
-        return self.body.count(BOX)
+        return self.body.count(BODY)
         # pass
 
     @property
@@ -100,27 +102,19 @@ class Ship:
 
     @property
     def buffer_cells_set(self):
+        """Возвращает сет буферной зоны вокруг корабля"""
         sb = self.coords_set
         print(sb)
-        # if self.direction == "H"
-        #     _set = {}
-        #     pass
-        # elif self.direction == "V":
-        #     pass
-        # else:
-        #     raise ValueError("Введено неправильное направление корабля!")
-        # формируем окружающие (буферные) координаты:
         _set = set()
         for coord in sb:
             x, y = coord[0], coord[1]
             _set = _set | {
-                    (x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
-                    (x - 1, y),                 (x + 1, y),
-                    (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
+                (x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
+                (x - 1, y), (x + 1, y),
+                (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
             }
-        _set -= sb
+        _set -= sb # вычитаем массив координат корабля из массива координат буферной зону
         return _set
-
 
 
 # ========================================================================
@@ -130,10 +124,11 @@ class Board:
         - player: игрок (компьютер или человек). Корабли поля человека отображаются для него всегда
         - список кораблей
         - размерность: число - сторона квадрата, по умолчанию 6
-        - points: двумерный массив состояний точек - море, корабль, буфер вокруг корабля, обстреляна
+        - cells: двумерный массив состояний точек - море, корабль, буфер вокруг корабля, обстреляна
         - coords: массив координат
 
     """
+
     def __init__(self, player, ships, side=6):
         if side < 6 or side > 99:
             raise ValueError(f"Размер поля должен быть в пределах от 6 до 99, указан '{side}'")
@@ -145,7 +140,7 @@ class Board:
         for ship in self.ships:
             for cell in ship:
                 coords = (cell[0][0], cell[0][1])
-                self.cells[coords[0]][coords[1]] = BOX if cell[1] else EMPTY
+                self.cells[coords[0]][coords[1]] = BODY if cell[1] else EMPTY
 
         # place_ships()
 
@@ -169,7 +164,7 @@ class Board:
         и False при неудачной после превышения числа попыток"""
         max_attempts = 3
         # ship = Ship(4)
-        #lst = [(i, j) for i in range(self._side) for j in range(self._side)]
+        # lst = [(i, j) for i in range(self._side) for j in range(self._side)]
         i = 0
         while True:
             i += 1
@@ -184,31 +179,84 @@ class Board:
                 for i, coord in enumerate(ship.coords):
                     self.cells[coord[0]][coord[1]] = ship.body[i]
                     print(coord, ship.body[i])
+                # for i, coord in enumerate(ship.buffer_cells_set):
+                #     self.cells
                 return True
 
     def place_ship_sets(self, ship):
         """Возвращает True при успешной попытке размещения корабля
         и False при неудачной после превышения числа попыток"""
-        max_attempts = 130
-        # ship = Ship(4)
-        #lst = [(i, j) for i in range(self._side) for j in range(self._side)]
+        max_attempts = 300
         i = 0
         while True:
             i += 1
-            print("i:", i)
+            # print("i:", i)
             if i > max_attempts:
                 print("too many iterations")
                 return False
             ship.front = choice(self.coords)
-            if  (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set()):
+            if (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set):
                 for i, coord in enumerate(ship.coords):
-                    print(coord, ship)
+                    # print(coord, ship)
                     self.cells[coord[0]][coord[1]] = ship.body[i]
+                    _set = self.coords_set & ship.buffer_cells_set
+                    print("buffer:", [coord for coord in _set])
+                    for coord in _set:
+                        self.cells[coord[0]][coord[1]] = BUFFER
                 return True
             else:
                 continue
         return False
 
+    def place_ship_sets2(self, ship):
+        print("hi from place2")
+        def do_place():
+            for i, coord in enumerate(ship.coords):
+                print("def do_place():", coord, ship)
+                self.cells[coord[0]][coord[1]] = ship.body[i]
+                _set = self.coords_set & ship.buffer_cells_set
+                print("buffer:", [coord for coord in _set])
+                for coord in _set:
+                    self.cells[coord[0]][coord[1]] = BUFFER
+
+        if ship.front: # если человек (заранее указана координата носа), пытаемся разместить корабль
+            intersection = ship.coords_set & self.occupied_set
+            print("hi from if ship.front", ship.front)
+            if (ship.coords_set.issubset(self.coords_set)) and not intersection:
+                do_place()
+                return True
+            elif not ship.coords_set.issubset(self.coords_set):
+                raise exceptions.OutOfBoard(ship.front, ship.len)
+            elif intersection:
+                raise exceptions.PointUsedAlready(intersection)
+            else:
+                print("Something strange happened")
+            # try_to_place
+        else: # если компьютер, делаем случайный выбор и пытаемся разместить корабль
+            print("hi from place2else")
+            max_attempts = 5000
+            i = 0
+            while True:
+                ship.front = choice(self.coords)
+                i += 1
+                # print("i:", i)
+                if i > max_attempts:
+                    print("too many iterations")
+                    return False
+                if (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set):
+                    do_place()
+                    return True
+                else:
+                    continue
+            return False
+
+    def place_ships(self, ships):
+        count = 0
+        for i, ship in enumerate(ships):
+            if self.place_ship_sets2(ship):
+                count += 1
+            print("Ship No", i + 1)
+        print(f"Успешно размещено {count} из {len(ships)} кораблей!")
 
     @property
     def coords(self):
@@ -227,45 +275,41 @@ class Board:
     def occupied(self):
         target = []
         for i, elem in enumerate(self.cells):
-            target += [(e, i, j) for j, e in enumerate(elem) if e in (BOX, DAGGER, HIT)]
+            target += [(e, i, j) for j, e in enumerate(elem) if e in (BODY, DAGGER, HIT)]
         return target
-
+    @property
     def occupied_set(self):
         """Возвращает сет пар запрещенных для хода координат"""
-        return {(x, y) for x, elem in enumerate(self.cells) for y, e in enumerate(elem) if e in (BOX, DAGGER, HIT)}
-
+        return {(x, y) for x, elem in enumerate(self.cells) for y, e in enumerate(elem) if
+                e in (BODY, BUFFER, DAGGER, HIT)}
 
     # def add_ship(self, ship):
     #     for cell in ship:
-    #         self.cells[cell[0]][cell[1]] = BOX
+    #         self.cells[cell[0]][cell[1]] = BODY
 
     # def place_ships(self):
     #     for ship in self.ships:
     #         for cell in ship:
-    #             self.cells[cell[0]][cell[1]] = BOX
+    #             self.cells[cell[0]][cell[1]] = BODY
 
     def __repr__(self):
         """Формирует строку с изображением поля"""
         divider = " | "
-        # rng = range(1, self._side + 1) # временно для тестирования
         rng = range(0, self._side)  # временно для тестирования
         head = f"{self.player.center(25, '_')}\n    "
         head += "  ".join(str(i).rjust(2) for i in rng)
         head += "\n"
         output = ""
         for i, line in enumerate(self.cells):
-            # out = ""
-            for cell in line:
-                inner = ((cell if self.display_ships or cell != BOX else EMPTY) for cell in line)
-                inner = divider.join(inner)
-            # s += str(i + 1) + "   " + divider.join(line) + "\n\n"
-            # s += f"{str(i + 1)}   {divider.join(line)}\n" #   {' -- ' * 6}\n"
-            output += str(i + 1).rjust(2) + '   ' + inner + "\n"
+            if self.display_ships:
+                inner = ((cell if cell != BUFFER else EMPTY) for cell in line)
+            else:
+                inner = ((cell if cell != BODY and cell != BUFFER else EMPTY) for cell in line)
 
-            # s += divider.join(line)
-            # s += "\n\n"
+            inner = divider.join(inner)
+            output += str(i).rjust(2) + '   ' + inner + "\n"  # временно для тестирования
         output = head + output
         return output
-        
+
     def fire(self, cell):
         pass
