@@ -4,7 +4,7 @@ from random import choice
 EMPTY = 'О'
 BODY = '■'
 HIT = "‡"
-MISS = "M"
+MISS = "T"
 
 # log(INFO, "I am in the weird function and a is", a, "and b is", b, "but I got a null C — using default", default_c)
 
@@ -88,7 +88,8 @@ s = "asdfdsa"
 # print(point in lst)
 # print(brd1)
 # print(brd1.cells)
-brd1 = Board("computer", [])
+# brd1 = Board("computer", [])
+brd1 = Board("computer")
 brd1.display_ships = True
 # print(brd1)
 
@@ -96,8 +97,8 @@ brd1.display_ships = True
 # sh1 = Ship(3, choice(["V", "H"]))
 # sh1 = Ship(2, "H", (5, 3))
 # sh2 = Ship(3, "V", (3, 0))
-sh1 = Ship(4, choice(["H", "V"]))
-sh2 = Ship(3, choice(["H", "V"]))
+sh1 = Ship(3, choice(["H", "V"]))
+sh2 = Ship(2, choice(["H", "V"]))
 sh3 = Ship(2, choice(["H", "V"]))
 sh4 = Ship(1, choice(["H", "V"]))
 sh5 = Ship(1, choice(["H", "V"]))
@@ -105,7 +106,9 @@ sh6 = Ship(1, choice(["H", "V"]))
 sh7 = Ship(1, choice(["H", "V"]))
 
 ships = [sh1, sh2, sh3, sh4, sh5, sh6, sh7]
-brd1.place_ships(ships)
+# brd1.place_ships(ships)
+# ship = Ship(4, "H", (1, 1))
+# brd1.place_ship_sets2(sh1)
 # sh.front = (2,3)
 # print(sh)
 # sh.body[1] = HIT
@@ -113,7 +116,7 @@ brd1.place_ships(ships)
 # sh.body[0] = HIT
 # print(sh)
 # print(dir(sh))
-print(brd1)
+# print(brd1)
 # print("brd1.place_ship(sh1)", brd1.place_ship_sets2(sh1))
 # print(brd1.cells)
 # print(brd1.coords)
@@ -145,3 +148,32 @@ print(brd1)
 # brd1.cells[0][1] = HIT
 # brd1.cells[4][3] = HIT
 # print(brd1)
+
+# print(brd1.ships)
+def fire(board, coord):
+    x, y = coord
+    # brd = Board("asdf")
+    board.cells[x][y] = HIT if board.cells[x][y] == BODY else MISS
+    # print(board)
+
+print(brd1)
+ship = Ship(4, "H", (1, 1))
+brd1.place_ship_sets2(ship)
+print(brd1)
+# fire(brd1,(1,1))
+brd1.fire((1,2))
+print(brd1)
+# print(ship)
+# print(brd1.cells[0][0])
+# print(brd1.ship_sets)
+# brd1.ship_sets()
+brd1.fire((1,1))
+print(brd1)
+brd1.fire((1,3))
+print(brd1)
+brd1.fire((1,5))
+print(brd1)
+# brd1.fire((1,5))
+# print(brd1)
+brd1.fire((3,2))
+print(brd1)

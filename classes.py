@@ -7,27 +7,32 @@ BODY = '■'
 DAGGER = '†'
 HIT = "‡"
 BUFFER = "B"
+MISS = "T"
+
 
 # =======================================
 class Point:
-    """Точка на игровой доске
+    """Точка на игровой доске или корабле
     Аттрибуты:
         - coords: пара координат (x, y)
-        - hit: обстреляна (True/False)
+        - value: обстреляна (True/False)
     """
-    pass
+    def __init__(self, coord, value ):
+        self.coord = coord
+        self.value = value
 
 
 # ======================================
 class Ship:
     """Корабль
     Аттрибуты:
-        - длина (количество клеток)
-        - координаты носа
-        - направление: горизонтальное (H) или вертикальное (V)
-        - размер поля (сторона квадрата)
-        - количество жизней
-        - массив точек (body)
+        - len: длина (количество клеток)
+        - front: координаты носа
+        - direction: направление: горизонтальное (H) или вертикальное (V)
+        - side: размер поля (сторона квадрата)
+        - lives: количество жизней
+        - body: строковый массив состояний точек корабля
+        - buffer_cells_set: сет кортежей из пар координат буферной зоны
     """
 
     def __init__(self, length, direction="H", front=(), board_size=6):
@@ -38,8 +43,23 @@ class Ship:
         self.len = length
         # self.nbr_lives = len
         self._body = []
+        self._body_dict = {}
         for _ in range(self._len):
             self._body.append(BODY)
+
+
+    @property
+    def body_dict(self):
+        return self.body_dict
+
+    @body_dict.setter
+    def body_dict(self, coord_value):
+        key, value = coord_value
+        if value not in [BODY, HIT]:
+            raise ValueError(f"Значение должно быть <{BODY}> или <{HIT}>")
+        self._body_dict[key] = value
+
+
 
     @property
     def len(self):
@@ -96,7 +116,7 @@ class Ship:
         pass
 
     def __repr__(self):
-        output = f"Корабль  {' '.join(self.body)} :\n\t- Длина: {self.len}\n\t- Координаты: {self.coords}\n\t" \
+        output = f"\nКорабль  {' '.join(self.body)} :\n\t- Длина: {self.len}\n\t- Координаты: {self.coords_set}\n\t" \
                  f"- Жизней: {self.nbr_lives}/{self.len}"
         return output
 
@@ -113,7 +133,7 @@ class Ship:
                 (x - 1, y), (x + 1, y),
                 (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
             }
-        _set -= sb # вычитаем массив координат корабля из массива координат буферной зону
+        _set -= sb  # вычитаем массив координат корабля из массива координат буферной зону
         return _set
 
 
@@ -129,20 +149,44 @@ class Board:
 
     """
 
-    def __init__(self, player, ships, side=6):
+
+    def __init__(self, player, side=6):
         if side < 6 or side > 99:
             raise ValueError(f"Размер поля должен быть в пределах от 6 до 99, указан '{side}'")
-        self.cells = [list(EMPTY * side) for _ in range(side)]
+        self._cells = [list(EMPTY * side) for _ in range(side)]
         self._side = side
         self.player = player
-        self.ships = ships
+        self.ships = []
+        # self.ships = ships # что передавать на поле при инициализации?
         self.display_ships = True
-        for ship in self.ships:
-            for cell in ship:
-                coords = (cell[0][0], cell[0][1])
-                self.cells[coords[0]][coords[1]] = BODY if cell[1] else EMPTY
+        self._used_cells = []
+        # for ship in self.ships:
+        #     print("hi from Board.__init__: for ship in self. ships")
+        #     for cell in ship:
+        #         coords = (cell[0][0], cell[0][1])
+        #         self.cells[coords[0]][coords[1]] = BODY if cell[1] else EMPTY
 
         # place_ships()
+
+    @property
+    def cells(self):
+        return self._cells
+
+    @cells.setter
+    def cells(self, value):
+        print("hi from @cells.setter")
+
+    @property
+    def used_cells(self):
+        return self._used_cells
+
+    @property
+    def ship_sets(self):
+        # for ship in ships:
+        #     print(ship)
+        # print(self.ships)
+        # print("len(self.ships)", len(self.ships))
+        return [ship.coords_set for ship in self.ships]
 
     def place_ship1(self, ship):
         # ship = Ship(4)
@@ -164,7 +208,7 @@ class Board:
         и False при неудачной после превышения числа попыток"""
         max_attempts = 3
         # ship = Ship(4)
-        # lst = [(i, j) for i in range(self._side) for j in range(self._side)]
+        lst = [(i, j) for i in range(self._side) for j in range(self._side)]
         i = 0
         while True:
             i += 1
@@ -215,14 +259,20 @@ class Board:
             bs = ship.buffer_cells_set
             cs = self.coords_set
             for i, coord in enumerate(ship.coords):
-                self.cells[coord[0]][coord[1]] = ship.body[i]
+                x, y = coord
+                # self.cells[coord[0]][coord[1]] = ship.body[i]
+                self.cells[x][y] = BODY
+
                 _set = cs & bs
                 for coord in _set:
-                    self.cells[coord[0]][coord[1]] = BUFFER
+                    x, y = coord
+                    self.cells[x][y] = BUFFER
+            self.ships.append(ship)
             print("buffer:", [coord for coord in _set])
             print("def do_place():", ship)
+
         try:
-            # если человек вручую пытаемся разместить корабль, непосредствено указав координата носа:
+            # если человек вручную пытаемся разместить корабль, непосредственно указав координата носа:
             if ship.front:
                 intersection = ship.coords_set & self.occupied_set
                 print("hi from if ship.front", ship.front)
@@ -237,17 +287,17 @@ class Board:
                     print("Something strange happened")
                     return False
 
-            # если компьютер или человек выбирает автоматическое размщение,
+            # если компьютер или человек выбирает автоматическое размещение,
             # делаем случайный выбор и пытаемся разместить корабль
             else:
-                # создаем споисок свободных координат для экономии усилий
+                # создаем список свободных координат для экономии усилий
                 vacant_coords = list(self.coords_set - self.occupied_set)
                 if not vacant_coords:
-                    print("vacant coords:", vacant_coords or "no vacant coords")
+                    # print("vacant coords:", vacant_coords or "no vacant coords")
                     raise exceptions.NoVacantCells()
-                else:
-                    print("vacant coords:", vacant_coords)
-                    print("occupied", self.occupied_set)
+                # else:
+                # print("vacant coords:", vacant_coords)
+                # print("occupied", self.occupied_set)
                 max_attempts = 10
                 i = 0
                 while True:
@@ -286,7 +336,7 @@ class Board:
             print("buffer:", [coord for coord in _set])
             print("def do_place():", ship)
 
-        # если человек вручую пытаемся разместить корабль, непосредствено указав координата носа:
+        # если человек вручную пытаемся разместить корабль, непосредственно указав координата носа:
         if ship.front:
             intersection = ship.coords_set & self.occupied_set
             print("hi from if ship.front", ship.front)
@@ -300,12 +350,12 @@ class Board:
             else:
                 print("Something strange happened")
             # try_to_place
-        # если компьютер или человек выбирает автоматическое размщение,
+        # если компьютер или человек выбирает автоматическое размещение,
         # делаем случайный выбор и пытаемся разместить корабль
         else:
 
             # print("hi from place2else")
-            # создаем споисок свободных координат для экономии усилий
+            # создаем список свободных координат для экономии усилий
             vacant_coords = list(self.coords_set - self.occupied_set)
             if not vacant_coords:
                 print("vacant coords:", vacant_coords or "no vacant coords")
@@ -338,28 +388,35 @@ class Board:
     def place_ships(self, ships):
         try:
             count = 0
+            msg = ""
             for i, ship in enumerate(ships):
                 if self.place_ship_sets2(ship):
                     count += 1
+                    # ships.append(ship)
+                    # print(ship)
                 print("Ship No", i + 1)
 
             if count < len(ships):
                 msg += ": попробуйте еще раз!"
                 # print(f"{msg}: попробуйте еще раз!")
             else:
+                # self.ships = ships
                 msg += ": все корабли размещены успешно."
+                self.ships = ships
                 # print(f"{msg}: все корабли размещены успешно.")
+                # print(self.ships)
         except exceptions.NoVacantCells as e:
             print(e)
         else:
-            msg = f"Размещено {count} из {len(ships)} кораблей"
+            # msg = f"Размещено {count} из {len(ships)} кораблей"
+            pass
         finally:
             msg = f"Размещено {count} из {len(ships)} кораблей"
             print(msg)
 
     @property
     def coords(self):
-        """Возвращает список пар координат"""
+        """Возвращает список кортежей из пар координат"""
         output = []
         for i, elem in enumerate(self.cells):
             output += [(i, j) for j, e in enumerate(elem)]
@@ -376,9 +433,10 @@ class Board:
         for i, elem in enumerate(self.cells):
             target += [(e, i, j) for j, e in enumerate(elem) if e in (BODY, DAGGER, HIT)]
         return target
+
     @property
     def occupied_set(self):
-        """Возвращает сет пар запрещенных для хода координат"""
+        """Возвращает сет кортежей из пар запрещенных для хода координат"""
         return {(x, y) for x, elem in enumerate(self.cells) for y, e in enumerate(elem) if
                 e in (BODY, BUFFER, DAGGER, HIT)}
 
@@ -401,7 +459,8 @@ class Board:
         output = ""
         for i, line in enumerate(self.cells):
             if self.display_ships:
-                inner = ((cell if cell != BUFFER else EMPTY) for cell in line)
+                # inner = ((cell if cell != BUFFER else EMPTY) for cell in line)
+                inner = ((cell if cell else EMPTY) for cell in line) # временно для теста
             else:
                 inner = ((cell if cell != BODY and cell != BUFFER else EMPTY) for cell in line)
 
@@ -411,4 +470,34 @@ class Board:
         return output
 
     def fire(self, cell):
-        pass
+        if cell in self.used_cells:
+            raise exceptions.PointHitAlready(cell)
+        self._used_cells.append((cell))
+        print("hi from fire:", cell)
+        x, y = cell
+        # brd = Board("asdf")
+        if self.cells[x][y] == BODY:
+            self.cells[x][y] = HIT
+            print("hi from fire if")
+        else:
+            self.cells[x][y] = MISS
+        # board.cells[x][y] = HIT if board.cells[x][y] == BODY else MISS
+        shot = {(x,y)}
+        print("shot:", shot)
+        for ship in self.ships:
+            # print("for ship in self.ship_sets, ship.coords:", ship.coords_set)
+            if shot & ship.coords_set:
+                # ship.body[x][y] = HIT
+                print("HIT!:", shot, ship.coords)
+                i = ship.coords.index((x,y))
+                print("ship.coords.index((x,y))", i )
+                ship.body[i] = HIT
+                print(ship)
+                # for i, coord in ship.coords:
+                #     if
+
+
+            # if ship & shot:
+            #     ship.coords[x],[y] = HIT
+            #     print("HIT!:", ship, shot)
+
