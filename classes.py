@@ -104,7 +104,7 @@ class Ship:
     def buffer_cells_set(self):
         """Возвращает сет буферной зоны вокруг корабля"""
         sb = self.coords_set
-        print(sb)
+        print("hi from buffer_cells_set", sb)
         _set = set()
         for coord in sb:
             x, y = coord[0], coord[1]
@@ -209,17 +209,85 @@ class Board:
         return False
 
     def place_ship_sets2(self, ship):
-        print("hi from place2")
+        """Размещает корабль на поле автоматически либо вручную
+        """
         def do_place():
+            bs = ship.buffer_cells_set
+            cs = self.coords_set
             for i, coord in enumerate(ship.coords):
-                print("def do_place():", coord, ship)
                 self.cells[coord[0]][coord[1]] = ship.body[i]
-                _set = self.coords_set & ship.buffer_cells_set
-                print("buffer:", [coord for coord in _set])
+                _set = cs & bs
                 for coord in _set:
                     self.cells[coord[0]][coord[1]] = BUFFER
+            print("buffer:", [coord for coord in _set])
+            print("def do_place():", ship)
+        try:
+            # если человек вручую пытаемся разместить корабль, непосредствено указав координата носа:
+            if ship.front:
+                intersection = ship.coords_set & self.occupied_set
+                print("hi from if ship.front", ship.front)
+                if (ship.coords_set.issubset(self.coords_set)) and not intersection:
+                    do_place()
+                    return True
+                elif not ship.coords_set.issubset(self.coords_set):
+                    raise exceptions.OutOfBoard(ship.front, ship.len)
+                elif intersection:
+                    raise exceptions.PointUsedAlready(intersection)
+                else:
+                    print("Something strange happened")
+                    return False
 
-        if ship.front: # если человек (заранее указана координата носа), пытаемся разместить корабль
+            # если компьютер или человек выбирает автоматическое размщение,
+            # делаем случайный выбор и пытаемся разместить корабль
+            else:
+                # создаем споисок свободных координат для экономии усилий
+                vacant_coords = list(self.coords_set - self.occupied_set)
+                if not vacant_coords:
+                    print("vacant coords:", vacant_coords or "no vacant coords")
+                    raise exceptions.NoVacantCells()
+                else:
+                    print("vacant coords:", vacant_coords)
+                    print("occupied", self.occupied_set)
+                max_attempts = 10
+                i = 0
+                while True:
+                    ship.front = choice(vacant_coords)
+                    i += 1
+                    # print("i:", i)
+                    if i > max_attempts:
+                        raise exceptions.TooManyAttempts(i)
+                    if (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set):
+                        do_place()
+                        iters = 'iteration' if i == 1 else 'iterations'
+                        print(f"took {i} {iters} to place this ship ")
+                        return True
+                    else:
+                        continue
+        except exceptions.TooManyAttempts as e:
+            print(e)
+            return False
+        except exceptions.OutOfBoard as e:
+            print(e)
+            return False
+        except exceptions.PointUsedAlready as e:
+            print(e)
+            return False
+
+    def place_ship_sets_(self, ship):
+        # print("hi from place2")
+        def do_place():
+            bs = ship.buffer_cells_set
+            cs = self.coords_set
+            for i, coord in enumerate(ship.coords):
+                self.cells[coord[0]][coord[1]] = ship.body[i]
+                _set = cs & bs
+                for coord in _set:
+                    self.cells[coord[0]][coord[1]] = BUFFER
+            print("buffer:", [coord for coord in _set])
+            print("def do_place():", ship)
+
+        # если человек вручую пытаемся разместить корабль, непосредствено указав координата носа:
+        if ship.front:
             intersection = ship.coords_set & self.occupied_set
             print("hi from if ship.front", ship.front)
             if (ship.coords_set.issubset(self.coords_set)) and not intersection:
@@ -232,12 +300,27 @@ class Board:
             else:
                 print("Something strange happened")
             # try_to_place
-        else: # если компьютер, делаем случайный выбор и пытаемся разместить корабль
-            print("hi from place2else")
-            max_attempts = 5000
+        # если компьютер или человек выбирает автоматическое размщение,
+        # делаем случайный выбор и пытаемся разместить корабль
+        else:
+
+            # print("hi from place2else")
+            # создаем споисок свободных координат для экономии усилий
+            vacant_coords = list(self.coords_set - self.occupied_set)
+            if not vacant_coords:
+                print("vacant coords:", vacant_coords or "no vacant coords")
+                # raise ValueError("No vacant cells!")
+            else:
+                print("vacant coords:", vacant_coords)
+                print("occupied", self.occupied_set)
+            max_attempts = 10
             i = 0
             while True:
-                ship.front = choice(self.coords)
+                # vacant_coords = list(self.coords_set - self.occupied_set)
+
+                # ship.front = choice(self.coords)
+
+                ship.front = choice(vacant_coords)
                 i += 1
                 # print("i:", i)
                 if i > max_attempts:
@@ -245,18 +328,32 @@ class Board:
                     return False
                 if (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set):
                     do_place()
+                    iters = 'iteration' if i == 1 else 'iterations'
+                    print(f"took {i} {iters} to place this ship ")
                     return True
                 else:
                     continue
             return False
 
     def place_ships(self, ships):
-        count = 0
-        for i, ship in enumerate(ships):
-            if self.place_ship_sets2(ship):
-                count += 1
-            print("Ship No", i + 1)
-        print(f"Успешно размещено {count} из {len(ships)} кораблей!")
+        try:
+            count = 0
+            for i, ship in enumerate(ships):
+                if self.place_ship_sets2(ship):
+                    count += 1
+                print("Ship No", i + 1)
+            msg = f"Размещено {count} из {len(ships)} кораблей"
+            if count < len(ships):
+                msg += ": попробуйте еще раз!"
+                # print(f"{msg}: попробуйте еще раз!")
+            else:
+                msg += ": все корабли размещены успешно."
+                # print(f"{msg}: все корабли размещены успешно.")
+        except exceptions.NoVacantCells as e:
+            print(e)
+            msg = f"Размещено {count} из {len(ships)} кораблей"
+        finally:
+            print(msg)
 
     @property
     def coords(self):
