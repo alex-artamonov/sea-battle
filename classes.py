@@ -342,7 +342,7 @@ class Board:
                 if self.place_ship_sets2(ship):
                     count += 1
                 print("Ship No", i + 1)
-            msg = f"Размещено {count} из {len(ships)} кораблей"
+
             if count < len(ships):
                 msg += ": попробуйте еще раз!"
                 # print(f"{msg}: попробуйте еще раз!")
@@ -351,8 +351,10 @@ class Board:
                 # print(f"{msg}: все корабли размещены успешно.")
         except exceptions.NoVacantCells as e:
             print(e)
+        else:
             msg = f"Размещено {count} из {len(ships)} кораблей"
         finally:
+            msg = f"Размещено {count} из {len(ships)} кораблей"
             print(msg)
 
     @property
