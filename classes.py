@@ -34,30 +34,41 @@ class Ship:
         - body: строковый массив состояний точек корабля
         - buffer_cells_set: сет кортежей из пар координат буферной зоны
     """
+    #
+    # def __init__(self, length, direction="H", front=(), board_size=6):
+    #     self._front = front
+    #     self.direction = direction
+    #     self.board_size = board_size
+    #     self._max_len = 4
+    #     self.len = length
+    #     # self.nbr_lives = len
+    #     self._body = []
+    #     self.body_dict = {}
+    #     for _ in range(self._len):
+    #         self._body.append(BODY)
+
 
     def __init__(self, length, direction="H", front=(), board_size=6):
-        self._front = front
+        self.front = front
         self.direction = direction
         self.board_size = board_size
         self._max_len = 4
         self.len = length
-        # self.nbr_lives = len
-        self._body = []
-        self._body_dict = {}
-        for _ in range(self._len):
-            self._body.append(BODY)
+        self.body_dict = {}
+        # for _ in range(self._len):
+        #     self._body.append(BODY)
 
 
-    @property
-    def body_dict(self):
-        return self.body_dict
-
-    @body_dict.setter
-    def body_dict(self, coord_value):
-        key, value = coord_value
-        if value not in [BODY, HIT]:
-            raise ValueError(f"Значение должно быть <{BODY}> или <{HIT}>")
-        self._body_dict[key] = value
+    # @property
+    # def body_dict(self):
+    #     return self._body_dict
+    #
+    # @body_dict.setter
+    # def body_dict(self, coord_value):
+    #     key, value = coord_value
+    #     if value not in [BODY, HIT]:
+    #         raise ValueError(f"Значение должно быть <{BODY}> или <{HIT}>")
+    #     self._body_dict[key] = value
 
 
 
@@ -65,13 +76,20 @@ class Ship:
     def len(self):
         return self._len
 
-    @property
-    def front(self):
-        return self._front
+    @len.setter
+    def len(self, value):
+        if not (0 < value <= self._max_len):
+            raise ValueError("Корабль слишком большой!")
+        else:
+            self._len = value
 
-    @front.setter
-    def front(self, val):
-        self._front = val
+    # @property
+    # def front(self):
+    #     return self._front
+    #
+    # @front.setter
+    # def front(self, val):
+    #     self._front = val
 
     @property
     def coords(self):
@@ -94,30 +112,32 @@ class Ship:
         else:
             raise ValueError("Введено неправильное направление корабля!")
 
-    @len.setter
-    def len(self, value):
-        if not (0 < value <= self._max_len):
-            raise ValueError("Корабль слишком большой!")
-        else:
-            self._len = value
+
 
     @property
     def nbr_lives(self):
-        return self.body.count(BODY)
+        return list(self.body_dict.values()).count(BODY)
         # pass
+    #
+    # @property
+    # def body(self):
+    #     return self._body
 
-    @property
-    def body(self):
-        return self._body
-
-    @body.setter
-    def body(self, cell, val=DAGGER):
-        self._body[cell] = val
-        pass
+    # @body.setter
+    # def body(self, cell, val=DAGGER):
+    #     self._body[cell] = val
+    #     pass
 
     def __repr__(self):
-        output = f"\nКорабль  {' '.join(self.body)} :\n\t- Длина: {self.len}\n\t- Координаты: {self.coords_set}\n\t" \
+        output = f"\nКорабль  {''.join(self.body)} :\n\t- Длина: {self.len}\n\t- Координаты: {self.coords_set}\n\t" \
                  f"- Жизней: {self.nbr_lives}/{self.len}"
+        # print("self._body_dict.values()", "".join(self._body_dict.values()))
+        return output
+
+    def __str__(self):
+        output = f"\nКорабль  {''.join(self.body_dict.values())} :\n\t- Длина: {self.len}\n\t- Координаты: {self.coords_set}\n\t" \
+                 f"- Жизней: {self.nbr_lives}/{self.len}"
+        # return ''.join(self._body_dict.values())
         return output
 
     @property
@@ -261,8 +281,7 @@ class Board:
             for i, coord in enumerate(ship.coords):
                 x, y = coord
                 # self.cells[coord[0]][coord[1]] = ship.body[i]
-                self.cells[x][y] = BODY
-
+                self.cells[x][y], ship.body_dict[(x,y)] = BODY, BODY
                 _set = cs & bs
                 for coord in _set:
                     x, y = coord
@@ -469,6 +488,7 @@ class Board:
         output = head + output
         return output
 
+
     def fire(self, cell):
         if cell in self.used_cells:
             raise exceptions.PointHitAlready(cell)
@@ -476,25 +496,31 @@ class Board:
         print("hi from fire:", cell)
         x, y = cell
         # brd = Board("asdf")
-        if self.cells[x][y] == BODY:
-            self.cells[x][y] = HIT
-            print("hi from fire if")
-        else:
-            self.cells[x][y] = MISS
+        # if self.cells[x][y] == BODY:
+        #     self.cells[x][y] = HIT
+        #     print("hi from fire if")
+        # else:
+        #     self.cells[x][y] = MISS
         # board.cells[x][y] = HIT if board.cells[x][y] == BODY else MISS
+
         shot = {(x,y)}
+        self.cells[x][y] = MISS #по умолчанию
         print("shot:", shot)
         for ship in self.ships:
             # print("for ship in self.ship_sets, ship.coords:", ship.coords_set)
             if shot & ship.coords_set:
                 # ship.body[x][y] = HIT
                 print("HIT!:", shot, ship.coords)
-                i = ship.coords.index((x,y))
-                print("ship.coords.index((x,y))", i )
-                ship.body[i] = HIT
+                self.cells[x][y], ship.body_dict[cell] = HIT, HIT
+                print("ship.body_dict", ship.body_dict)
+                # i = ship.coords.index((x,y))
+                # print("ship.coords.index((x,y))", i )
+                # ship.body[i] = HIT
                 print(ship)
+                break
                 # for i, coord in ship.coords:
                 #     if
+
 
 
             # if ship & shot:

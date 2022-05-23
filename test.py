@@ -106,7 +106,7 @@ sh6 = Ship(1, choice(["H", "V"]))
 sh7 = Ship(1, choice(["H", "V"]))
 
 ships = [sh1, sh2, sh3, sh4, sh5, sh6, sh7]
-# brd1.place_ships(ships)
+brd1.place_ships(ships)
 # ship = Ship(4, "H", (1, 1))
 # brd1.place_ship_sets2(sh1)
 # sh.front = (2,3)
@@ -177,3 +177,6 @@ print(brd1)
 # print(brd1)
 brd1.fire((3,2))
 print(brd1)
+
+d = {1:'one'}
+type(d.values())
