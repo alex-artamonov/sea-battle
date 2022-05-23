@@ -25,17 +25,28 @@ class TooManyAttempts(Exception):
         self.message = message + f": ({attempts})"
         super().__init__(self.message)
 
+class FailedToPlaceAllShips(Exception):
+    """Raised when some ships have been left unplaced
+    Attributes:
+        message - - explanation of the error"""
 
-# class PointUsedAlready(Exception):
-#     """Raised when the point has been already taken
-#     Attributes:
-#         point - - input point which caused the error
-#         message - - explanation of the error"""
-#
-#     def __init__(self, points, message="Эта точка занята!"):
-#         self.message = f"Координаты {points} уже заняты!"
-#         # self.point = point
-#         super().__init__(self.message)
+    def __init__(self, message="Не удалось разместить все корабли"):
+        self.message = message
+        # self.point = point
+        super().__init__(self.message)
+
+
+
+class PointUsedAlready(Exception):
+    """Raised when the point has been already taken
+    Attributes:
+        point - - input point which caused the error
+        message - - explanation of the error"""
+
+    def __init__(self, points, message="Эта точка занята!"):
+        self.message = f"Координаты {points} уже заняты!"
+        # self.point = point
+        super().__init__(self.message)
 
 class OutOfBoard(Exception):
     """Raised when the point is beyond the board

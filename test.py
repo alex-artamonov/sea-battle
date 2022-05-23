@@ -1,25 +1,22 @@
-from classes import Ship, Board
+from ship import Ship
+from board import Board
 from random import choice
 
-EMPTY = 'О'
-BODY = '■'
-HIT = "‡"
-MISS = "T"
 
 # log(INFO, "I am in the weird function and a is", a, "and b is", b, "but I got a null C — using default", default_c)
 
-def display_board(player):
-    divider = " | "
-    rng = range(1, 7)
-    head = f"{player}\n    "
-    head += "   ".join(str(i) for i in rng)
-    head += "\n\n"
-    # print()
-    s = ""
-    for j in rng:
-        # s += str(j) + divider + divider.join(EMPTY * 6) + "\n\n"
-        s += f"{str(j)}   {divider.join(EMPTY * 6)}\n\n"
-    return head + s.strip()
+# def display_board(player):
+#     divider = " | "
+#     rng = range(1, 7)
+#     head = f"{player}\n    "
+#     head += "   ".join(str(i) for i in rng)
+#     head += "\n\n"
+#     # print()
+#     s = ""
+#     for j in rng:
+#         # s += str(j) + divider + divider.join(EMPTY * 6) + "\n\n"
+#         s += f"{str(j)}   {divider.join(EMPTY * 6)}\n\n"
+#     return head + s.strip()
 
 
 
@@ -57,7 +54,7 @@ def print_side_by_side(str1, str2, divider = "    |    "):
     for line1, line2 in zip(s1, s2):
         print(line1.ljust(nbr_spaced) + divider + line2)
 
-s1, s2 = display_board("human:\n".center(25)), display_board("computer:\n".center(25))
+# s1, s2 = display_board("human:\n".center(25)), display_board("computer:\n".center(25))
 
 # print_side_by_side(s1, s2)
 
@@ -106,7 +103,7 @@ sh6 = Ship(1, choice(["H", "V"]))
 sh7 = Ship(1, choice(["H", "V"]))
 
 ships = [sh1, sh2, sh3, sh4, sh5, sh6, sh7]
-# brd1.place_ships(ships)
+brd1.place_ships(ships)
 # ship = Ship(4, "H", (1, 1))
 # brd1.place_ship_sets2(sh1)
 # sh.front = (2,3)
@@ -158,7 +155,7 @@ def fire(board, coord):
 
 print(brd1)
 ship = Ship(4, "H", (1, 1))
-brd1.place_ship_sets2(ship)
+brd1.place_ship(ship)
 print(brd1)
 # fire(brd1,(1,1))
 brd1.fire((1,2))
