@@ -190,7 +190,19 @@ class Board:
                     continue
             return False
 
-    def place_ships(self, ships):
+    def try_place_ships(self, ships):
+        count = 0
+        for i, ship in enumerate(ships):
+            if self.place_ship(ship):
+                count += 1
+            print(f"Корабль №{i + 1} длины {ship.len}")
+
+        if count < len(ships):
+            raise exceptions.FailedToPlaceAllShips()
+        else:
+            self.ships = ships
+
+    def place_ships_old(self, ships):
         try:
             count = 0
             msg = ""
@@ -222,6 +234,7 @@ class Board:
             msg = f"Размещено {count} из {len(ships)} кораблей"
             print(msg)
 
+
     @property
     def coords_set(self):
         """Возвращает сет кортежей из пар координат"""
@@ -232,6 +245,10 @@ class Board:
         """Возвращает сет кортежей из пар запрещенных для размещения корабля координат"""
         return {(x, y) for x, elem in enumerate(self.cells) for y, e in enumerate(elem) if
                 e in (BODY, BUFFER, DAGGER, HIT)}
+
+    def clear_board(self):
+        for ship in self.ships:
+            pass
 
     def __repr__(self):
         """Формирует строку с изображением поля"""
