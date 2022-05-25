@@ -120,59 +120,22 @@ def initialize_game():
     sh17 = Ship(1, choice(["H", "V"]))
     ships = [sh1, sh2, sh3, sh4, sh5, sh6, sh7]
     ships2 = [sh11, sh12, sh13, sh14, sh15, sh16, sh17]
-    brd_computer.display_ships = False
+    brd_computer.display_ships = True
     place_ships(brd_computer, ships)
     place_ships(brd_human, ships2)
     # brd_computer.place_ships(ships)
     # brd_human.place_ships(ships2)
     # print(brd_computer)
-    # print_side_by_side(brd_computer.__repr__(), brd_human.__repr__(), divider="    |    ")
-    print_side_by_side(str(brd_computer), str(brd_human))
-    # move = input('Fire!')
-    # move = (int(move[0]), int(move[1]))
-    # brd_computer.fire(move)
-    # print_side_by_side(str(brd_computer), str(brd_human))
-
-    current_player = brd_computer
-    next_player = brd_human
-
-    while True:
-        try:
-            move = input(f'{next_player.player}! Fire!\t')
-            if move == 'q':
-                exit()
-            move = (int(move[0]), int(move[1]))
-            current_player.fire(move)
-        except (exceptions.PointHitAlready, IndexError, ValueError) as e:
-            print(e, ' - try again!')
-            continue
-        else:
-            current_player, next_player = next_player, current_player
-            print_side_by_side(str(brd_computer), str(brd_human))
-
-
+    print_side_by_side(brd_computer.__repr__(), brd_human.__repr__(), divider="    |    ")
 
 def place_ships(board, ships):
-    (print(ship.front or 'Nothing') for ship in ships)
-    n = 0
-    while True:        
+    while True:
         try:
-            n +=1            
             board.try_place_ships(ships)
-            
-        except (exceptions.FailedToPlaceAllShips, exceptions.NoVacantCells)  as e:
-            print(e)
-            # print(board.cells)
-            board.clear()
-            # print(board.cells)
-            # break
+        except exceptions.FailedToPlaceAllShips() as e:
             continue
-        except exceptions.PointUsedAlready as e:
-            print(e)
-
         else:
-            # print(f"all ships on the {board.player}'s board have been successfully placed. Number of attempts:", n)
-            print(f"Все корабли на доске игрока '{board.player}' были успешно размещены случайным образом. Число попыток:", n)
+            print("all ships have been successfully placed")
             break
 
 
