@@ -2,19 +2,8 @@
 # from board import BODY
 BODY = '■'
 # =======================================
-class Point:
-    """Точка на игровой доске или корабле
-    Аттрибуты:
-        - coords: пара координат (x, y)
-        - value: обстреляна (True/False)
-    """
-
-    def __init__(self, coord, value):
-        self.coord = coord
-        self.value = value
 
 
-# ======================================
 class Ship:
     """Корабль
     Аттрибуты:
@@ -27,19 +16,6 @@ class Ship:
         - buffer_cells_set: сет кортежей из пар координат буферной зоны
     """
 
-    #
-    # def __init__(self, length, direction="H", front=(), board_size=6):
-    #     self._front = front
-    #     self.direction = direction
-    #     self.board_size = board_size
-    #     self._max_len = 4
-    #     self.len = length
-    #     # self.nbr_lives = len
-    #     self._body = []
-    #     self.body_dict = {}
-    #     for _ in range(self._len):
-    #         self._body.append(BODY)
-
     def __init__(self, length, direction="H", front=(), board_size=6):
         self.front = front
         self.direction = direction
@@ -49,17 +25,6 @@ class Ship:
         self.body_dict = {}
         # for _ in range(self._len):
         #     self._body.append(BODY)
-
-    # @property
-    # def body_dict(self):
-    #     return self._body_dict
-    #
-    # @body_dict.setter
-    # def body_dict(self, coord_value):
-    #     key, value = coord_value
-    #     if value not in [BODY, HIT]:
-    #         raise ValueError(f"Значение должно быть <{BODY}> или <{HIT}>")
-    #     self._body_dict[key] = value
 
     @property
     def len(self):
@@ -71,14 +36,6 @@ class Ship:
             raise ValueError("Корабль слишком большой!")
         else:
             self._len = value
-
-    # @property
-    # def front(self):
-    #     return self._front
-    #
-    # @front.setter
-    # def front(self, val):
-    #     self._front = val
 
     @property
     def coords(self):
@@ -106,8 +63,6 @@ class Ship:
         return list(self.body_dict.values()).count(BODY)
         # pass
 
-
-
     def __repr__(self):
         output = f"\nКорабль  {''.join(self.body_dict.values())} :\n\t- Длина: {self.len}\n" \
                  f"\t- Координаты: {self.coords_set}\n\t" \
@@ -117,7 +72,7 @@ class Ship:
 
     @property
     def buffer_cells_set(self):
-        """Возвращает сет буферной зоны вокруг корабля"""
+        """Возвращает сет кортежей координат буферной зоны вокруг корабля"""
         sb = self.coords_set
         _set = set()
         for coord in sb:
