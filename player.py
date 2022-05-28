@@ -18,8 +18,7 @@ class Player:
         self.my_board = my_board
         self.their_board = their_board
         self.fired_at = set()
-        self.one_shot_kill = False
-
+        self.just_killed_a_ship = False
 
     def move(self):
         """Вызываем метод ask, делаем выстрел по вражеской доске
@@ -32,9 +31,9 @@ class Player:
             try:
                 mv = self.ask()
                 if self.their_board.take_fire(mv):
-                    self.one_shot_kill = True
+                    self.just_killed_a_ship = True
                 else:
-                    self.one_shot_kill = False
+                    self.just_killed_a_ship = False
                 self.fired_at.add(mv)
                 break
             except exceptions.PointHitAlready as e:
@@ -51,12 +50,9 @@ class Player:
     def ask(self):
         return NotImplemented
 
-
-
-
 class User(Player):
     def ask(self):
-        move = input(f'{self.name}! Fire!{globals.INP_INVITE}\t')
+        move = input(f'{self.name}! Огонь!{globals.INP_INVITE}\t')
         if move in globals.QUIT:
             print(f"Спасибо за игру, {self.name}!")
             exit()
@@ -69,9 +65,10 @@ class User(Player):
             return move
 
 class AI(Player):
-
+    """реализация родительского метода-заглушки"""
     def ask(self):
         side = self.their_board.side
+        # чтобы совсем не палить случайноым образом, ограничиваем до возможных ходов:
         lst_moves = list({(i, j) for i in range(side) for j in range(side)} - self.fired_at)
         mv = choice(lst_moves)
         return mv

@@ -4,5 +4,5 @@ BODY = '■'
 DAGGER = '†'
 HIT = "‡"
 MISS = "О"
-INP_INVITE = "\n?-->\t"
-QUIT = ['Q','q','Й', 'й']
+INP_INVITE = "\n?--> "
+QUIT = ['Q', 'q', 'Й', 'й']

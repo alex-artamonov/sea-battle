@@ -14,7 +14,7 @@ class Ship:
         - lives: количество жизней
         - body: строковый массив состояний точек корабля
         - buffer_cells_set: сет кортежей из пар координат буферной зоны
-        - is_sunken: False если на плаву. True если подбит
+        - is_afloat: True если на плаву. False если подбит
     """
 
     def __init__(self, length, direction="H", front=(), board_size=6):
@@ -24,8 +24,6 @@ class Ship:
         self._max_len = 4
         self.len = length
         self.body_dict = {}
-        # for _ in range(self._len):
-        #     self._body.append(BODY)
 
     @property
     def len(self):
@@ -68,12 +66,6 @@ class Ship:
     def is_afloat(self):
         return self.nbr_lives > 0
 
-    def __repr__(self):
-        # output = f"\nКорабль  {''.join(self.body_dict.values())} :\n\t- Длина: {self.len}\n" \
-        #          f"\t- Координаты: {self.coords_set}\n\t" \
-        #          f"- Жизней: {self.nbr_lives}/{self.len}"
-        return ''.join(self.body_dict.values())
-        return output
     def __str__(self):
         return ''.join(self.body_dict.values())
 
