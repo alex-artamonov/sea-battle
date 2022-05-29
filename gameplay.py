@@ -69,7 +69,7 @@ def gameplay():
 
     # устанавливаем режим видимости кораблей
     brd_computer.display_ships = False
-    brd_computer.display_ships = True
+    brd_human.display_ships = True
 
     # выводим доски рядом
     print_side_by_side(str(brd_computer), str(brd_human))
