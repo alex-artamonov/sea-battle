@@ -42,7 +42,7 @@ class Board:
     def occupied_set(self):
         """Возвращает сет кортежей из пар запрещенных для размещения корабля координат"""
         return {(x, y) for x, elem in enumerate(self.cells) for y, e in enumerate(elem) if
-                e in (globals.BODY, BUFFER, globals.DAGGER, globals.HIT)}
+                e in (globals.BODY, BUFFER, globals.HIT)}
 
     @property
     def has_ships_afloat(self):
@@ -68,18 +68,17 @@ class Board:
         vacant_coords = list(self.coords_set - self.occupied_set)
         if not vacant_coords:
             raise exceptions.NoVacantCells()
-        max_attempts = 10
+        max_attempts = 30
         i = 0
         while True:
             ship.front = choice(vacant_coords)
             i += 1
-            # print("i:", i)
-            if i > max_attempts:
+            if i == max_attempts:
                 raise exceptions.TooManyAttempts(i)
             if (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set):
                 do_place()
                 iters = 'iteration' if i == 1 else 'iterations'
-                print(f"*took {i} {iters} to place this ship*")
+                # print(f"*took {i} {iters} to place this ship*") # для отладки
                 return True
             else:
                 continue
@@ -87,15 +86,18 @@ class Board:
     def try_place_ships(self, ships):
         count = 0
         for i, ship in enumerate(ships):
-            # print(i, ship.len)
             if self.place_ship(ship):
                 count += 1
-            print(f"Корабль №{i + 1} длины {ship.len} прибывает в пункт назначения")
+                # print(f"Корабль №{i + 1} длины {ship.len} прибыл в пункт назначения")
+            else:
+                raise exceptions.NoVacantCells(f"Нет свободного места для размещения корабля №{i + 1}!")
 
-        if count < len(ships):
-            raise exceptions.FailedToPlaceAllShips()
-        else:
-            self.ships = ships
+        self.ships = ships
+
+        # if count < len(ships):
+        #     raise exceptions.FailedToPlaceAllShips()
+        # else:
+        #     self.ships = ships
 
 
     def clear(self):
@@ -107,6 +109,7 @@ class Board:
     def __repr__(self):
         """Формирует строку с изображением поля"""
         shps = ' '.join(str(ship) for ship in self.ships)
+        shps = globals.to_lines_by_limit(shps, 24)
         divider = "|"
         rng = range(0 + 1, self.side + 1)  # нумеруем с единицы
         head = f"\n{self.player.center(17, '_')}\n{shps}\n\n  "
@@ -126,7 +129,7 @@ class Board:
 
     def take_fire(self, cell):
         """Устанавливает состояние поля и корабля по результату выстрела
-        возвращает True если корабль убит и false в остальных случаях"""
+        возвращает состояние ячейки, а если корабль "убит", то globals.SUNKEN"""
         if cell in self.used_cells:
             x, y = cell
             cell = (x + 1, y + 1) # переводим на язык пользовательских координат
@@ -140,7 +143,6 @@ class Board:
                 self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
                 if not ship.is_afloat:
                     print(f"*Корабль длины {ship.len} подбит!*")
-                    return True
-                return False
-        return False
+                    return globals.SUNKEN, ship.len
+        return self.cells[x][y], ''
 

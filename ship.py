@@ -32,7 +32,7 @@ class Ship:
     @len.setter
     def len(self, value):
         if not (0 < value <= self._max_len):
-            raise ValueError("Корабль слишком большой!")
+            raise ValueError(f"Корабль длины {value} слишком большой!")
         else:
             self._len = value
 
@@ -67,7 +67,8 @@ class Ship:
         return self.nbr_lives > 0
 
     def __str__(self):
-        return ''.join(self.body_dict.values())
+
+        return str(self.len) + ':' + chr(160) + ''.join(self.body_dict.values())
 
     @property
     def buffer_cells_set(self):

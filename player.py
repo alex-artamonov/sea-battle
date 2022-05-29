@@ -2,6 +2,8 @@ from board import Board
 import globals
 import exceptions
 from random import choice
+from globals import MOVE_DICT
+from globals import ai_to_user
 
 class Player:
     """ родитель для классов User и AI
@@ -28,14 +30,17 @@ class Player:
 
         while True:
             msg = "Попробуйте еще раз."
+            self.just_killed_a_ship = False
             try:
                 mv = self.ask()
-                if self.their_board.take_fire(mv):
-                    self.just_killed_a_ship = True
-                else:
-                    self.just_killed_a_ship = False
                 self.fired_at.add(mv)
-                break
+                print("from move: ", self.fired_at)
+                result = self.their_board.take_fire(mv)[0]
+                ship_len = self.their_board.take_fire(mv)[1]
+                if result[0] == globals.SUNKEN:
+                    self.just_killed_a_ship = True
+                print(f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!")
+                return
             except exceptions.PointHitAlready as e:
                 print(e, msg)
                 continue
@@ -45,7 +50,6 @@ class Player:
             except ValueError:
                 print("Введано неверное значение координат.", msg)
                 continue
-
 
     def ask(self):
         return NotImplemented
@@ -71,6 +75,7 @@ class AI(Player):
         # чтобы совсем не палить случайноым образом, ограничиваем до возможных ходов:
         lst_moves = list({(i, j) for i in range(side) for j in range(side)} - self.fired_at)
         mv = choice(lst_moves)
+        print(lst_moves)
         return mv
 
 
