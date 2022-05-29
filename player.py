@@ -34,13 +34,12 @@ class Player:
             try:
                 mv = self.ask()
                 self.fired_at.add(mv)
-                print("from move: ", self.fired_at)
-                result = self.their_board.take_fire(mv)[0]
-                ship_len = self.their_board.take_fire(mv)[1]
-                if result[0] == globals.SUNKEN:
+                result, ship_len = self.their_board.take_fire(mv)
+                # ship_len = self.their_board.take_fire(mv)[1] # !! Lessson learned - double call lead to infinite cycle
+                if result == globals.SUNKEN:
                     self.just_killed_a_ship = True
-                print(f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!")
-                return
+                return (f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!")
+                # return
             except exceptions.PointHitAlready as e:
                 print(e, msg)
                 continue
@@ -75,7 +74,6 @@ class AI(Player):
         # чтобы совсем не палить случайноым образом, ограничиваем до возможных ходов:
         lst_moves = list({(i, j) for i in range(side) for j in range(side)} - self.fired_at)
         mv = choice(lst_moves)
-        print(lst_moves)
         return mv
 
 

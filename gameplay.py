@@ -4,7 +4,6 @@ from globals import to_lines_by_limit
 from globals import print_side_by_side
 from globals import INP_INVITE
 from globals import QUIT
-# from globals import clear_screen
 from ship import Ship
 from board import Board
 from random import choice
@@ -21,7 +20,11 @@ gameplay_dict = {"COMPUTER_NAME": "A.I. Computer", HUMAN: 'human'}
 def greeting():
     print("Представьтесь, пожалуйста:")
     gameplay_dict["HUMAN_NAME"] = input(INP_INVITE).capitalize()
-    print("Привет,", gameplay_dict["HUMAN_NAME"])
+    msg = f"Привет, {gameplay_dict['HUMAN_NAME']}. Я - плод нескольких дней мучений " \
+        f"студента школы Skillfactory Александра Артамонова, " \
+        f"скрипт на Питоне, {gameplay_dict['COMPUTER_NAME']}"
+    print(to_lines_by_limit(msg))
+    # print("Привет,", . ,)
     gameplay_dict["SIDE"] = 6
     msg = "Вспомним детство, поиграем в ""Морской бой""?\n"
     msg += "Играем на поле 6 * 6. При желании выйти из игры (и проиграть) можно ввести 'q' " \
@@ -90,20 +93,20 @@ def gameplay():
         msg = "Не повезло. Первый ход - мой."
         current_player, next_player = ai, usr
 
-    msg += "Ходы обозначаются двумя цифрами подряд, например 12. Первая цифра - ряд, вторая - колонка.\n"
+    msg += "\nХоды обозначаются двумя цифрами подряд, например 12. Первая цифра - ряд, вторая - колонка.\n"
     print(to_lines_by_limit(msg))
-
+    msg = ""
     move_number = 0
     while current_player.their_board.has_ships_afloat:
         try:
             move_number += 1
-            current_player.move()
-            # exit()
+            msg = current_player.move()
+            # print(msg)
             while current_player.just_killed_a_ship and current_player.their_board.has_ships_afloat:
-                # clear_screen()
-                print(f"Отличный выстрел, {current_player.name}! За это полагается бонусный ход!")
                 print_side_by_side(str(brd_computer), str(brd_human))
-                current_player.move()
+                print(msg)
+                print(f"Отличный выстрел, {current_player.name}! За это полагается бонусный ход!")
+                msg = current_player.move()
         except (exceptions.PointHitAlready, IndexError, ValueError) as e:
             print(e, ' - try again!')
             continue
@@ -113,10 +116,8 @@ def gameplay():
             exit()
         else:
             current_player, next_player = next_player, current_player
-            # print("move_number:", move_number)
-            # if move_number % 2 == 0:
-            # clear_screen()
             print_side_by_side(str(brd_computer), str(brd_human))
+            print(msg)
     print(f"Победу одержал {current_player.name}")
 
 

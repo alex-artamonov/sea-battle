@@ -13,15 +13,6 @@ MOVE_DICT = {MISS: "мимо",
              SUNKEN: "подбит вражеский корабль длины "
              }
 
-
-def _clear_screen():
-    """Заклинание для очистки экрана терминала
-    https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
-    """
-    #    print("\x1B[H\x1B[J")
-    print("\033[H\033[2J", end="")
-
-
 def to_lines_by_limit(string, limit=60):
     """Для форматирования: разбивает сплошной текст на строки с указанным
     лимитом знаков без переноса слов. Вероятно это была трата времени

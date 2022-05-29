@@ -88,7 +88,6 @@ class Board:
         for i, ship in enumerate(ships):
             if self.place_ship(ship):
                 count += 1
-                # print(f"Корабль №{i + 1} длины {ship.len} прибыл в пункт назначения")
             else:
                 raise exceptions.NoVacantCells(f"Нет свободного места для размещения корабля №{i + 1}!")
 
@@ -127,13 +126,12 @@ class Board:
         output = head + output
         return output
 
-    def take_fire(self, cell):
-        """Устанавливает состояние поля и корабля по результату выстрела
+    def take_fire(self, cell) -> tuple():
+        """Устанавливает состояние поля и корабля по результату выстрела и
         возвращает состояние ячейки, а если корабль "убит", то globals.SUNKEN"""
         if cell in self.used_cells:
             x, y = cell
-            cell = (x + 1, y + 1) # переводим на язык пользовательских координат
-            raise exceptions.PointHitAlready(cell)
+            raise exceptions.PointHitAlready(globals.ai_to_user(cell))
         self.used_cells.append(cell)
         x, y = cell
         shot = {(x, y)}
@@ -142,7 +140,7 @@ class Board:
             if shot & ship.coords_set:
                 self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
                 if not ship.is_afloat:
-                    print(f"*Корабль длины {ship.len} подбит!*")
+                    # возвращаем вызывавшей функции о подбитии корабля и его длине
                     return globals.SUNKEN, ship.len
-        return self.cells[x][y], ''
-
+        #  возвращаем вызвавшей функции непосредственное  состояние обстрелянной точки
+        return self.cells[x][y], ''  # длину сообщаем только в случае подбитого корабля
