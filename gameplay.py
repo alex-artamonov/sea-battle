@@ -14,7 +14,9 @@ from player import User, AI
 
 
 HUMAN = "HUMAN_NAME"
-gameplay_dict = {"COMPUTER_NAME": "A.I. Computer", HUMAN: 'human'}
+gameplay_dict = {"COMPUTER_NAME": "A.I. Computer",
+                 HUMAN: 'human',
+                 "SIDE": 6}
 
 
 def greeting():
@@ -24,8 +26,7 @@ def greeting():
         f"студента школы Skillfactory Александра Артамонова, " \
         f"скрипт на Питоне, {gameplay_dict['COMPUTER_NAME']}"
     print(to_lines_by_limit(msg))
-    # print("Привет,", . ,)
-    gameplay_dict["SIDE"] = 6
+
     msg = "Вспомним детство, поиграем в ""Морской бой""?\n"
     msg += "Играем на поле 6 * 6. При желании выйти из игры (и проиграть) можно ввести 'q' " \
            "вместо хода. В каждом флоте участвуют 7 кораблей:\n"
@@ -42,29 +43,32 @@ def gameplay():
     brd_human = Board(gameplay_dict[HUMAN])
     try:
         sh1 = Ship(3, choice(["H", "V"]))
-        sh2 = Ship(3, choice(["H", "V"]))
+        sh2 = Ship(2, choice(["H", "V"]))
         sh3 = Ship(2, choice(["H", "V"]))
         sh4 = Ship(1, choice(["H", "V"]))
         sh5 = Ship(1, choice(["H", "V"]))
         sh6 = Ship(1, choice(["H", "V"]))
         sh7 = Ship(1, choice(["H", "V"]))
         sh11 = Ship(3, choice(["H", "V"]))
-        sh12 = Ship(3, choice(["H", "V"]))
+        sh12 = Ship(2, choice(["H", "V"]))
         sh13 = Ship(2, choice(["H", "V"]))
         sh14 = Ship(1, choice(["H", "V"]))
         sh15 = Ship(1, choice(["H", "V"]))
         sh16 = Ship(1, choice(["H", "V"]))
         sh17 = Ship(1, choice(["H", "V"]))
     except Exception as e:
-        print("Возникла непредвиденная ситуация. Игра завершается.")
+        print(to_lines_by_limit("Возникла непредвиденная ситуация: видимо, "
+                                "не удалось расставить корабли. Игра завершается."))
         print(e)
         exit()
     else:
-        ships = [sh1, sh2, sh3, sh4, sh5, sh6, sh7]
-        ships2 = [sh11, sh12, sh13, sh14, sh15, sh16, sh17]
-        place_ships(brd_computer, ships)
-        place_ships(brd_human, ships2)
+        # ships =
+        # ships2 =
+        place_ships(brd_computer, [sh1, sh2, sh3, sh4, sh5, sh6, sh7])
+        place_ships(brd_human, [sh11, sh12, sh13, sh14, sh15, sh16, sh17])
 
+    # устанавливаем режим видимости кораблей
+    brd_computer.display_ships = False
     brd_computer.display_ships = True
 
     # выводим доски рядом
@@ -95,7 +99,8 @@ def gameplay():
 
     msg += "\nХоды обозначаются двумя цифрами подряд, например 12. Первая цифра - ряд, вторая - колонка.\n"
     print(to_lines_by_limit(msg))
-    msg = ""
+
+    # обработка и смена ходов
     move_number = 0
     while current_player.their_board.has_ships_afloat:
         try:
