@@ -3,7 +3,6 @@ import globals
 from globals import to_lines_by_limit
 from globals import print_side_by_side
 from globals import INP_INVITE
-from globals import QUIT
 from ship import Ship
 from board import Board
 from random import choice
@@ -135,7 +134,7 @@ def place_ships(board, ships):
             number_of_attempts += 1
             board.try_place_ships(ships)
         except (exceptions.FailedToPlaceAllShips, exceptions.NoVacantCells) as e:
-            # print(e)
+            print(e)
             board.clear()
             continue
         except exceptions.PointUsedAlready as e:
