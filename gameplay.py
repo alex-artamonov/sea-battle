@@ -11,60 +11,74 @@ from player import User, AI
 
 # CLEAR = "\x1B[H\x1B[J"
 
-
+COMPUTER = "COMPUTER_NAME"
 HUMAN = "HUMAN_NAME"
-gameplay_dict = {"COMPUTER_NAME": "A.I. Computer",
-                 HUMAN: 'human',
-                 "SIDE": 6}
+SIDE = "side"
+ship_dict = {3: 1, 2: 3, 1: 4}
+ship_count = sum(ship_dict.values())
+
+gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", SIDE: 6}
 
 
 def greeting():
-    print("Представьтесь, пожалуйста:")
+
+    border = 20 * "="
+    ship_list = ""
+    for e in ship_dict:
+        ship_list += f"\n- {e} * {ship_dict[e]}-палубных"
+    ship_list = f"{border}\n{ship_list}\n{border}"
+    print("Перед началом игры, представьтесь, пожалуйста:")
     gameplay_dict["HUMAN_NAME"] = input(INP_INVITE).capitalize()
-    msg = f"Привет, {gameplay_dict['HUMAN_NAME']}. Я - плод нескольких дней мучений " \
-        f"студента школы Skillfactory Александра Артамонова, " \
+    msg = (
+        f"Привет, {gameplay_dict[HUMAN]}. Я - плод нескольких дней мучений "
+        f"студента школы Skillfactory Александра Артамонова, "
         f"скрипт на Питоне, {gameplay_dict['COMPUTER_NAME']}"
+    )
     print(to_lines_by_limit(msg))
 
-    msg = "Вспомним детство, поиграем в ""Морской бой""?\n"
-    msg += "Играем на поле 6 * 6. При желании выйти из игры (и проиграть) можно ввести 'q' " \
-           "вместо хода. В каждом флоте участвуют 7 кораблей:\n"
-    msg += "- 1 корабль на 3 клетки\n- 2 корабля на 2 клетки\n- 4 корабля на 1 клетку\n"
+    msg = "Вспомним детство, поиграем в " "Морской бой" "?\n"
+    msg += (
+        f"Играем на поле 6 * 6. При желании выйти из игры (и проиграть) можно ввести 'q' "
+        f"вместо хода. В каждом флоте участвуют {ship_count} кораблей:\n"
+    )
+    msg += f"{ship_list}\n"
     msg += "Итак, приступим. Для начала разместим корабли на поле боя. Поехали!\n"
     print(to_lines_by_limit(msg))
 
 
-def gameplay():
-    """Движок игры. Реализовал в виде функции, а не класса, так как
-    'simple is better than complex'  """
+def populate_fleet(lst):
+    for ele in ship_dict:
+        for i in range(ship_dict[ele]):
+            lst.append(Ship(ele, choice(["H", "V"])))
 
-    brd_computer = Board(gameplay_dict["COMPUTER_NAME"])
-    brd_human = Board(gameplay_dict[HUMAN])
+
+def gameplay():
+    """Движок игры. Реализован в виде функции, а не класса, так как
+    'simple is better than complex'"""
+
+    brd_computer = Board(gameplay_dict[COMPUTER], gameplay_dict[SIDE])
+    brd_human = Board(gameplay_dict[HUMAN], gameplay_dict[SIDE])
+
+    ships_computer = []
+    populate_fleet(ships_computer)
+
+    ships_human = []
+    populate_fleet(ships_human)
+
     try:
-        sh1 = Ship(3, choice(["H", "V"]))
-        sh2 = Ship(2, choice(["H", "V"]))
-        sh3 = Ship(2, choice(["H", "V"]))
-        sh4 = Ship(1, choice(["H", "V"]))
-        sh5 = Ship(1, choice(["H", "V"]))
-        sh6 = Ship(1, choice(["H", "V"]))
-        sh7 = Ship(1, choice(["H", "V"]))
-        sh11 = Ship(3, choice(["H", "V"]))
-        sh12 = Ship(2, choice(["H", "V"]))
-        sh13 = Ship(2, choice(["H", "V"]))
-        sh14 = Ship(1, choice(["H", "V"]))
-        sh15 = Ship(1, choice(["H", "V"]))
-        sh16 = Ship(1, choice(["H", "V"]))
-        sh17 = Ship(1, choice(["H", "V"]))
+        place_ships(brd_computer, ships_computer)
+        place_ships(brd_human, ships_human)
     except Exception as e:
-        print(to_lines_by_limit("Возникла непредвиденная ситуация: видимо, "
-                                "не удалось расставить корабли. Игра завершается."))
+        print(
+            to_lines_by_limit(
+                "Возникла непредвиденная ситуация: видимо, "
+                "не удалось расставить корабли. Игра завершается."
+            )
+        )
         print(e)
         exit()
-    else:
         # ships =
         # ships2 =
-        place_ships(brd_computer, [sh1, sh2, sh3, sh4, sh5, sh6, sh7])
-        place_ships(brd_human, [sh11, sh12, sh13, sh14, sh15, sh16, sh17])
 
     # устанавливаем режим видимости кораблей
     brd_computer.display_ships = False
@@ -75,12 +89,14 @@ def gameplay():
     usr = User(brd_human, brd_computer, gameplay_dict[HUMAN])
     ai = AI(brd_computer, brd_human, gameplay_dict["COMPUTER_NAME"])
 
-    msg = "Чтобы определить, кто первый ходит, бросим жребий. " \
-          "Решка - 1, Орел - 2. Для выхода нажмите 'q'"
+    msg = (
+        "Чтобы определить, кто первый ходит, бросим жребий. "
+        "Решка - 1, Орел - 2. Для выхода нажмите 'q'"
+    )
     print(to_lines_by_limit(msg))
     while True:
         bet = input(INP_INVITE)
-        if bet in ('1', '2'):
+        if bet in ("1", "2"):
             break
         elif bet in globals.QUIT:
             print(f"До следующего раза, {usr.name}")
@@ -88,7 +104,7 @@ def gameplay():
         else:
             print("Попробуйте еще")
 
-    flip_coin = choice(('1', '2'))
+    flip_coin = choice(("1", "2"))
     if bet == flip_coin:
         msg = "Угадали! Первый ход - ваш."
         current_player, next_player = usr, ai
@@ -106,13 +122,18 @@ def gameplay():
             move_number += 1
             msg = current_player.move()
             # print(msg)
-            while current_player.just_killed_a_ship and current_player.their_board.has_ships_afloat:
+            while (
+                current_player.just_killed_a_ship
+                and current_player.their_board.has_ships_afloat
+            ):
                 print_side_by_side(str(brd_computer), str(brd_human))
                 print(msg)
-                print(f"Отличный выстрел, {current_player.name}! За это полагается бонусный ход!")
+                print(
+                    f"Отличный выстрел, {current_player.name}! За это полагается бонусный ход!"
+                )
                 msg = current_player.move()
         except (exceptions.PointHitAlready, IndexError, ValueError) as e:
-            print(e, ' - try again!')
+            print(e, " - try again!")
             continue
         except Exception as e:
             # При непредвиденной ошибке
@@ -145,8 +166,10 @@ def place_ships(board, ships):
             print(e)
             exit()
         else:
-            msg = f"Все корабли на доске игрока '{board.player}' " \
-                  f"были успешно размещены случайным образом. Число попыток: {number_of_attempts}"
+            msg = (
+                f"Все корабли на доске игрока '{board.player}' "
+                f"были успешно размещены случайным образом. Число попыток: {number_of_attempts}"
+            )
             print(to_lines_by_limit(msg))
             break
 

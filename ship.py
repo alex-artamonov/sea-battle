@@ -1,6 +1,6 @@
 # import exceptions
 # from board import BODY
-BODY = '■'
+BODY = "■"
 # =======================================
 
 
@@ -17,11 +17,11 @@ class Ship:
         - is_afloat: True если на плаву. False если подбит
     """
 
-    def __init__(self, length, direction="H", front=(), board_size=6):
+    def __init__(self, length, direction="H", front=(), max_len=4):
         self.front = front
         self.direction = direction
-        self.board_size = board_size
-        self._max_len = 4
+        # self.board_size = board_size
+        self._max_len = max_len
         self.len = length
         self.body_dict = {}
 
@@ -51,9 +51,15 @@ class Ship:
     @property
     def coords_set(self):
         if self.direction == "H":
-            return {(self.front[0], self.front[1] + i) for i, cell in enumerate(range(self._len))}
+            return {
+                (self.front[0], self.front[1] + i)
+                for i, cell in enumerate(range(self._len))
+            }
         elif self.direction == "V":
-            return {(self.front[0] + i, self.front[1]) for i, cell in enumerate(range(self._len))}
+            return {
+                (self.front[0] + i, self.front[1])
+                for i, cell in enumerate(range(self._len))
+            }
         else:
             raise ValueError("Введено неправильное направление корабля!")
 
@@ -67,8 +73,10 @@ class Ship:
         return self.nbr_lives > 0
 
     def __str__(self):
+        return str(self.len) + ":" + chr(160) + "".join(self.body_dict.values())
 
-        return str(self.len) + ':' + chr(160) + ''.join(self.body_dict.values())
+    def __repr__(self):
+        return str(self.len) + ":" + chr(160) + "".join(self.body_dict.values())
 
     @property
     def buffer_cells_set(self):
@@ -78,16 +86,20 @@ class Ship:
         for coord in sb:
             x, y = coord[0], coord[1]
             _set = _set | {
-                (x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
-                (x - 1, y), (x + 1, y),
-                (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
+                (x - 1, y - 1),
+                (x, y - 1),
+                (x + 1, y - 1),
+                (x - 1, y),
+                (x + 1, y),
+                (x - 1, y + 1),
+                (x, y + 1),
+                (x + 1, y + 1),
             }
-        _set -= sb  # вычитаем массив координат корабля из массива координат буферной зону
+        _set -= (
+            sb  # вычитаем массив координат корабля из массива координат буферной зону
+        )
         return _set
 
     def clear(self):
         self.front = ()
         self.body_dict = {}
-
-
-

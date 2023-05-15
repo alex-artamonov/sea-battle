@@ -2,11 +2,13 @@
 from random import choice
 import exceptions
 import globals
+
 BUFFER = "B"
 LOWER_LIMIT = 3
 UPPER_LIMIT = 20
 
 # ========================================================================
+
 
 class Board:
     """Игровое поле
@@ -19,8 +21,10 @@ class Board:
 
     def __init__(self, player, side=6):
         if side < LOWER_LIMIT or side > UPPER_LIMIT:
-            raise ValueError(f"Размер поля должен быть в пределах от {LOWER_LIMIT} "
-                             f"до {UPPER_LIMIT}, указан '{side}'")
+            raise ValueError(
+                f"Размер поля должен быть в пределах от {LOWER_LIMIT} "
+                f"до {UPPER_LIMIT}, указан '{side}'"
+            )
         self.cells = [list(globals.EMPTY * side) for _ in range(side)]
         self.side = side
         self.player = player
@@ -41,8 +45,12 @@ class Board:
     @property
     def occupied_set(self):
         """Возвращает сет кортежей из пар запрещенных для размещения корабля координат"""
-        return {(x, y) for x, elem in enumerate(self.cells) for y, e in enumerate(elem) if
-                e in (globals.BODY, BUFFER, globals.HIT)}
+        return {
+            (x, y)
+            for x, elem in enumerate(self.cells)
+            for y, e in enumerate(elem)
+            if e in (globals.BODY, BUFFER, globals.HIT)
+        }
 
     @property
     def has_ships_afloat(self):
@@ -50,8 +58,8 @@ class Board:
         return any(ship.is_afloat for ship in self.ships)
 
     def place_ship(self, ship):
-        """Размещает корабль на поле автоматически
-        """
+        """Размещает корабль на поле случайным образом"""
+
         def do_place():
             bs = ship.buffer_cells_set
             cs = self.coords_set
@@ -64,20 +72,23 @@ class Board:
                     x, y = buffer_coord
                     self.cells[x][y] = BUFFER
             self.ships.append(ship)
+
         # создаем список свободных координат для экономии усилий
         vacant_coords = list(self.coords_set - self.occupied_set)
         if not vacant_coords:
             raise exceptions.NoVacantCells()
-        max_attempts = 30
+        max_attempts = 130
         i = 0
         while True:
             ship.front = choice(vacant_coords)
             i += 1
             if i == max_attempts:
                 raise exceptions.TooManyAttempts(i)
-            if (ship.coords_set.issubset(self.coords_set)) and not (ship.coords_set & self.occupied_set):
+            if (ship.coords_set.issubset(self.coords_set)) and not (
+                ship.coords_set & self.occupied_set
+            ):
                 do_place()
-                iters = 'iteration' if i == 1 else 'iterations'
+                iters = "iteration" if i == 1 else "iterations"
                 # print(f"*took {i} {iters} to place this ship*") # для отладки
                 return True
             else:
@@ -89,15 +100,11 @@ class Board:
             if self.place_ship(ship):
                 count += 1
             else:
-                raise exceptions.NoVacantCells(f"Нет свободного места для размещения корабля №{i + 1}!")
+                raise exceptions.NoVacantCells(
+                    f"Нет свободного места для размещения корабля №{i + 1}!"
+                )
 
         self.ships = ships
-
-        # if count < len(ships):
-        #     raise exceptions.FailedToPlaceAllShips()
-        # else:
-        #     self.ships = ships
-
 
     def clear(self):
         """Очистка игрового поля и кораблей"""
@@ -107,7 +114,7 @@ class Board:
 
     def __repr__(self):
         """Формирует строку с изображением поля"""
-        shps = ' '.join(str(ship) for ship in self.ships)
+        shps = " ".join(str(ship) for ship in self.ships)
         shps = globals.to_lines_by_limit(shps, 24)
         divider = "|"
         rng = range(0 + 1, self.side + 1)  # нумеруем с единицы
@@ -119,10 +126,13 @@ class Board:
             if self.display_ships:
                 inner = ((cell if cell != BUFFER else globals.EMPTY) for cell in line)
             else:
-                inner = ((cell if cell != globals.BODY and cell != BUFFER else globals.EMPTY) for cell in line)
+                inner = (
+                    (cell if cell != globals.BODY and cell != BUFFER else globals.EMPTY)
+                    for cell in line
+                )
 
-            inner = divider.join(inner)
-            output += str(i + 1).rjust(2) + ' ' + inner + "\n" # нумеруем строки с 1
+            inner = divider.join(inner) + divider
+            output += str(i + 1).rjust(2) + " " + inner + "\n"  # нумеруем строки с 1
         output = head + output
         return output
 
@@ -137,10 +147,31 @@ class Board:
         shot = {(x, y)}
         self.cells[x][y] = globals.MISS  # по умолчанию
         for ship in self.ships:
+            # print(ship.coords)
             if shot & ship.coords_set:
                 self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
                 if not ship.is_afloat:
+                    print(ship.body_dict)
+                    self.display_kill(ship)
+                    self.display_buffer(ship)
+                    # self.cells[x][y], ship.body_dict[cell] = globals.SUNKEN, globals.SUNKEN
                     # возвращаем вызывавшей функции о подбитии корабля и его длине
                     return globals.SUNKEN, ship.len
         #  возвращаем вызвавшей функции непосредственное  состояние обстрелянной точки
-        return self.cells[x][y], ''  # длину сообщаем только в случае подбитого корабля
+        return self.cells[x][y], ""  # длину сообщаем только в случае подбитого корабля
+
+    def update_state(self, cell, ship):
+        x, y = cell
+        shot = {(x, y)}
+        if shot & ship.coords_set:
+            self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
+
+    def display_kill(self, ship):
+        for s in ship.coords:
+            self.cells[s[0]][s[1]] = globals.SUNKEN
+
+    def display_buffer(self, ship):
+        st = ship.buffer_cells_set & self.coords_set
+
+        for cell in st:
+            self.cells[cell[0]][cell[1]] = "·"
