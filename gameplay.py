@@ -7,6 +7,7 @@ from ship import Ship
 from board import Board
 from random import choice
 from player import User, AI
+from os import system
 
 
 # CLEAR = "\x1B[H\x1B[J"
@@ -58,10 +59,8 @@ def gameplay():
 
     brd_computer = Board(gameplay_dict[COMPUTER], gameplay_dict[SIDE])
     brd_human = Board(gameplay_dict[HUMAN], gameplay_dict[SIDE])
-
     ships_computer = []
     populate_fleet(ships_computer)
-
     ships_human = []
     populate_fleet(ships_human)
 
@@ -126,6 +125,7 @@ def gameplay():
                 current_player.just_killed_a_ship
                 and current_player.their_board.has_ships_afloat
             ):
+                system("clear")
                 print_side_by_side(str(brd_computer), str(brd_human))
                 print(msg)
                 print(
@@ -141,6 +141,7 @@ def gameplay():
             exit()
         else:
             current_player, next_player = next_player, current_player
+            system("clear")
             print_side_by_side(str(brd_computer), str(brd_human))
             print(msg)
     print(f"Победу одержал {current_player.name}")
