@@ -176,6 +176,10 @@ def place_ships(board, ships):
             break
 
 
+def get_possible_coords():
+    pass
+
+
 def start_game():
     greeting()
     gameplay()
