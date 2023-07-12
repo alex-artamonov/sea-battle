@@ -23,6 +23,7 @@ class Player:
         self.their_board = their_board
         self.fired_at = set()
         self.just_killed_a_ship = False
+        self.message = ""
 
     def move(self):
         """Вызываем метод ask, делаем выстрел по вражеской доске
@@ -40,7 +41,8 @@ class Player:
                 # ship_len = self.their_board.take_fire(mv)[1] # !! Lessson learned - double call lead to infinite cycle
                 if result == globals.SUNKEN:
                     self.just_killed_a_ship = True
-                return f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!"
+                self.message = f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!"
+                return 
                 # return
             except exceptions.PointHitAlready as e:
                 print(e, msg)

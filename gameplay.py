@@ -15,10 +15,10 @@ from os import system
 COMPUTER = "COMPUTER_NAME"
 HUMAN = "HUMAN_NAME"
 FIELD_SIZE = "FIELD_SIZE"
-fleet_dict = {4: 1, 3: 2, 2: 3, 1: 4} #type of ship: ship count
+fleet_dict = {3: 1, 2: 3, 1: 3} #type of ship: ship count
 ship_count = sum(fleet_dict.values())
 
-gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 8}
+gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 6}
 
 
 def greeting():
@@ -115,12 +115,15 @@ def gameplay():
     msg += "\nХоды обозначаются двумя цифрами подряд, например 12. Первая цифра - ряд, вторая - колонка.\n"
     print(to_lines_by_limit(msg))
 
+    def get_message():
+        return f"Ход №{move_number//2 + 1}\n{next_player.message}\n{current_player.message}"
     # обработка и смена ходов
     move_number = 0
     while current_player.their_board.has_ships_afloat:
         try:
             move_number += 1
-            msg = current_player.move()
+            current_player.move()
+            msg = get_message()
             # print(msg)
             while (
                 current_player.just_killed_a_ship
@@ -132,7 +135,8 @@ def gameplay():
                 print(
                     f"Отличный выстрел, {current_player.name}! За это полагается бонусный ход!"
                 )
-                msg = current_player.move()
+                current_player.move()
+                msg = get_message()
         except (exceptions.PointHitAlready, IndexError, ValueError) as e:
             print(e, " - try again!")
             continue
