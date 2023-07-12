@@ -14,19 +14,19 @@ from os import system
 
 COMPUTER = "COMPUTER_NAME"
 HUMAN = "HUMAN_NAME"
-SIDE = "side"
-ship_dict = {3: 1, 2: 3, 1: 4}
-ship_count = sum(ship_dict.values())
+FIELD_SIZE = "FIELD_SIZE"
+fleet_dict = {4: 1, 3: 2, 2: 3, 1: 4} #type of ship: ship count
+ship_count = sum(fleet_dict.values())
 
-gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", SIDE: 6}
+gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 8}
 
 
 def greeting():
 
     border = 20 * "="
     ship_list = ""
-    for e in ship_dict:
-        ship_list += f"\n- {e} * {ship_dict[e]}-палубных"
+    for e in fleet_dict:
+        ship_list += f"\n- {e} * {fleet_dict[e]}-палубных"
     ship_list = f"{border}\n{ship_list}\n{border}"
     print("Перед началом игры, представьтесь, пожалуйста:")
     gameplay_dict["HUMAN_NAME"] = input(INP_INVITE).capitalize()
@@ -39,7 +39,7 @@ def greeting():
 
     msg = "Вспомним детство, поиграем в " "Морской бой" "?\n"
     msg += (
-        f"Играем на поле 6 * 6. При желании выйти из игры (и проиграть) можно ввести 'q' "
+        f"Играем на поле {gameplay_dict[FIELD_SIZE]} * {gameplay_dict[FIELD_SIZE]}. При желании выйти из игры (и проиграть) можно ввести 'q' "
         f"вместо хода. В каждом флоте участвуют {ship_count} кораблей:\n"
     )
     msg += f"{ship_list}\n"
@@ -48,8 +48,8 @@ def greeting():
 
 
 def populate_fleet(lst):
-    for ele in ship_dict:
-        for i in range(ship_dict[ele]):
+    for ele in fleet_dict:
+        for i in range(fleet_dict[ele]):
             lst.append(Ship(ele, choice(["H", "V"])))
 
 
@@ -57,8 +57,8 @@ def gameplay():
     """Движок игры. Реализован в виде функции, а не класса, так как
     'simple is better than complex'"""
 
-    brd_computer = Board(gameplay_dict[COMPUTER], gameplay_dict[SIDE])
-    brd_human = Board(gameplay_dict[HUMAN], gameplay_dict[SIDE])
+    brd_computer = Board(gameplay_dict[COMPUTER], gameplay_dict[FIELD_SIZE])
+    brd_human = Board(gameplay_dict[HUMAN], gameplay_dict[FIELD_SIZE])
     ships_computer = []
     populate_fleet(ships_computer)
     ships_human = []
