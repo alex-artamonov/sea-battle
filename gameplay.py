@@ -93,9 +93,10 @@ def gameplay():
         "Решка - 1, Орел - 2. Для выхода нажмите 'q'"
     )
     print(to_lines_by_limit(msg))
+    ALLOWED_BETS = ("1", "2")
     while True:
         bet = input(INP_INVITE)
-        if bet in ("1", "2"):
+        if bet in ALLOWED_BETS:
             break
         elif bet in globals.QUIT:
             print(f"До следующего раза, {usr.name}")
@@ -103,7 +104,7 @@ def gameplay():
         else:
             print("Попробуйте еще")
 
-    flip_coin = choice(("1", "2"))
+    flip_coin = choice(ALLOWED_BETS)
     if bet == flip_coin:
         msg = "Угадали! Первый ход - ваш."
         current_player, next_player = usr, ai
