@@ -174,4 +174,5 @@ class Board:
         st = ship.buffer_cells_set & self.coords_set
 
         for cell in st:
-            self.cells[cell[0]][cell[1]] = "·"
+            if cell not in self.used_cells:
+                self.cells[cell[0]][cell[1]] = "·"

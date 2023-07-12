@@ -116,7 +116,7 @@ def gameplay():
     print(to_lines_by_limit(msg))
 
     def get_message():
-        return f"Ход №{move_number//2 + 1}\n{next_player.message}\n{current_player.message}"
+        return f"Ход №{move_number}\n{next_player.message}\n{current_player.message}"
     # обработка и смена ходов
     move_number = 0
     while current_player.their_board.has_ships_afloat:
