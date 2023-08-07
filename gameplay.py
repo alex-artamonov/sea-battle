@@ -8,17 +8,19 @@ from board import Board
 from random import choice
 from player import User, AI
 from os import system
+import getpass as gp
 
 
 # CLEAR = "\x1B[H\x1B[J"
-
+score = {}
 COMPUTER = "COMPUTER_NAME"
 HUMAN = "HUMAN_NAME"
 FIELD_SIZE = "FIELD_SIZE"
 fleet_dict = {3: 1, 2: 3, 1: 3} #type of ship: ship count
+fleet_dict = {2: 1} #type of ship: ship count
 ship_count = sum(fleet_dict.values())
 
-gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 6}
+gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 2}
 
 
 def greeting():
@@ -28,8 +30,9 @@ def greeting():
     for e in fleet_dict:
         ship_list += f"\n- {e} * {fleet_dict[e]}-палубных"
     ship_list = f"{border}\n{ship_list}\n{border}"
-    print("Перед началом игры, представьтесь, пожалуйста:")
-    gameplay_dict["HUMAN_NAME"] = input(INP_INVITE).capitalize()
+    # print("Перед началом игры, представьтесь, пожалуйста:")
+    # gameplay_dict["HUMAN_NAME"] = input(INP_INVITE).capitalize()
+    gameplay_dict[HUMAN] = gp.getuser().capitalize()
     msg = (
         f"Привет, {gameplay_dict[HUMAN]}. Я - плод нескольких дней мучений "
         f"студента школы Skillfactory Александра Артамонова, "
@@ -63,6 +66,7 @@ def gameplay():
     populate_fleet(ships_computer)
     ships_human = []
     populate_fleet(ships_human)
+    
 
     try:
         place_ships(brd_computer, ships_computer)
@@ -94,6 +98,7 @@ def gameplay():
     )
     print(to_lines_by_limit(msg))
     ALLOWED_BETS = ("1", "2")
+    flip_coin = choice(ALLOWED_BETS)
     while True:
         bet = input(INP_INVITE)
         if bet in ALLOWED_BETS:
@@ -103,8 +108,7 @@ def gameplay():
             exit()
         else:
             print("Попробуйте еще")
-
-    flip_coin = choice(ALLOWED_BETS)
+    
     if bet == flip_coin:
         msg = "Угадали! Первый ход - ваш."
         current_player, next_player = usr, ai
@@ -119,7 +123,11 @@ def gameplay():
         return f"Ход №{move_number}\n{next_player.message}\n{current_player.message}"
     # обработка и смена ходов
     move_number = 0
+    endgame = False
     while current_player.their_board.has_ships_afloat:
+        if endgame:
+            current_player = next_player
+            break
         try:
             move_number += 1
             current_player.move()
@@ -127,9 +135,19 @@ def gameplay():
             # print(msg)
             while (
                 current_player.just_killed_a_ship
-                and current_player.their_board.has_ships_afloat
+                # and current_player.their_board.has_ships_afloat
             ):
-                system("clear")
+                if not current_player.their_board.has_ships_afloat:
+                    # print('supposed to be the end of game')
+                    # endgame = True
+                    # break
+                    print(f"Победу одержал {current_player.name}:")
+                    print_side_by_side(str(brd_computer), str(brd_human))
+                    update_score(current_player.name)
+                    print_score()
+                    # exit()
+                    return
+                # system("clear")
                 print_side_by_side(str(brd_computer), str(brd_human))
                 print(msg)
                 print(
@@ -146,10 +164,10 @@ def gameplay():
             exit()
         else:
             current_player, next_player = next_player, current_player
-            system("clear")
+            # system("clear")
             print_side_by_side(str(brd_computer), str(brd_human))
             print(msg)
-    print(f"Победу одержал {current_player.name}")
+    # print(f"Победу одержал {current_player.name}")
 
 
 def place_ships(board, ships):
@@ -180,10 +198,72 @@ def place_ships(board, ships):
             break
 
 
-def get_possible_coords():
-    pass
+# def get_possible_coords():
+#     pass
+
+def create_score():
+    global gameplay_dict
+    global score
+    # computer_name = 'Компьютер'
+    # gameplay_dict[COMPUTER] = COMPUTER
+    # gameplay_dict[HUMAN] = human_name
+    score[gameplay_dict[HUMAN]], score[gameplay_dict[COMPUTER]] = 0, 0
+
+def update_score(winner: str):
+    global score
+    score[winner] += 1
+
+def shift_right(text, n=2):
+    s = ''
+    ls = text.splitlines(True)
+    for line in ls:
+        s += ' ' * n + str(line)
+    return s
+
+def print_score():
+    computer_name = gameplay_dict[COMPUTER]
+    human_name = gameplay_dict[HUMAN]
+    head = '| ' + computer_name + ' | ' + human_name + ' |'
+    s_border = '=' * len(head)
+    numbers = '|' + str(score[computer_name]).center(len(computer_name) + 2)
+    numbers += '|' + str(score[human_name]).center(len(human_name) + 2) + '|'
+    lst = [s_border, head, numbers, s_border]
+    s = '\n'.join(lst)
+    s = shift_right(s, 6)
+    print(s)
+
+
+def play_again_or_leave():
+    human_name = gameplay_dict[HUMAN]
+    print("Сыграем еще? (Y/n)")
+    reply = input(INP_INVITE).upper().strip()
+    if reply in ('Y', ''):
+        res = True
+    elif reply == 'N' or "QUIT":
+        res = False
+    else:
+        print(f'не понял ответа, {human_name}, но видимо, нет')
+        res = False
+    if res:
+        print("Отлично, следующая игра!")
+        gameplay()
+        # initialize_game()
+        # clear_field()
+        # players_moves[HUMAN_MARK], players_moves[COMPUTER_MARK] = players_moves[COMPUTER_MARK], players_moves[HUMAN_MARK]
+        # if players_moves[COMPUTER_MARK] == CROSS:
+        #     print("теперь я за крестики")
+        #     computer_move()
+        # else:
+        #     human_move()
+    else:
+        print(f"Ну ладно, пока, {human_name}!")
+        exit()
 
 
 def start_game():
+    
     greeting()
+    create_score()
+    print_score()
     gameplay()
+    play_again_or_leave()

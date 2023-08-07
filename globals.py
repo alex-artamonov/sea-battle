@@ -6,8 +6,9 @@ BODY = "■"
 SUNKEN = "‡"
 HIT = "†"  # '*' #"‡"
 MISS = "-"
+UNKNOWN = '?'
 INP_INVITE = "\n?--> "
-QUIT = ["Q", "q", "Й", "й"]
+QUIT = ["Q", "q", "Й", "й", 'quit', 'QUIT']
 MOVE_DICT = {MISS: "мимо", HIT: "ранен", SUNKEN: "подбит вражеский корабль длины "}
 
 

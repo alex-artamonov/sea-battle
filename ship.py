@@ -31,7 +31,7 @@ class Ship:
     @len.setter
     def len(self, value):
         if not (0 < value <= self._max_len):
-            raise ValueError(f"Корабль длины {value} слишком большой!")
+            raise ValueError(f"Корабль длины {value} за пределами допустимой длины от 1 до {self._max_len}!")
         else:
             self._len = value
 

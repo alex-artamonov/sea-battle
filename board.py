@@ -4,7 +4,7 @@ import exceptions
 import globals
 
 BUFFER = "B"
-LOWER_LIMIT = 3
+LOWER_LIMIT = 2
 UPPER_LIMIT = 20
 
 # ========================================================================
@@ -31,6 +31,7 @@ class Board:
         self.ships = []
         self.display_ships = True
         self.used_cells = []
+        self.hit = ()
 
     @property
     def ship_sets(self):
@@ -88,7 +89,7 @@ class Board:
                 ship.coords_set & self.occupied_set
             ):
                 do_place()
-                iters = "iteration" if i == 1 else "iterations"
+                # iters = "iteration" if i == 1 else "iterations"
                 # print(f"*took {i} {iters} to place this ship*") # для отладки
                 return True
             else:
@@ -151,14 +152,16 @@ class Board:
             if shot & ship.coords_set:
                 self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
                 if not ship.is_afloat:
-                    print(ship.body_dict)
+                    # print(ship.body_dict)
                     self.display_kill(ship)
                     self.display_buffer(ship)
                     # self.cells[x][y], ship.body_dict[cell] = globals.SUNKEN, globals.SUNKEN
                     # возвращаем вызывавшей функции о подбитии корабля и его длине
-                    return globals.SUNKEN, ship.len
+                    return globals.SUNKEN, ship.len, ship
+                else:
+                    return globals.HIT, "", None
         #  возвращаем вызвавшей функции непосредственное  состояние обстрелянной точки
-        return self.cells[x][y], ""  # длину сообщаем только в случае подбитого корабля
+        return self.cells[x][y], "", None  # длину сообщаем только в случае подбитого корабля
 
     def update_state(self, cell, ship):
         x, y = cell
