@@ -1,5 +1,6 @@
 # import exceptions
 # from board import BODY
+import globals as g
 BODY = "■"
 # =======================================
 
@@ -31,7 +32,9 @@ class Ship:
     @len.setter
     def len(self, value):
         if not (0 < value <= self._max_len):
-            raise ValueError(f"Корабль длины {value} за пределами допустимой длины от 1 до {self._max_len}!")
+            raise ValueError(
+                f"Корабль длины {value} за пределами допустимой длины от 1 до {self._max_len}!"
+            )
         else:
             self._len = value
 
@@ -72,7 +75,11 @@ class Ship:
         return self.nbr_lives > 0
 
     def __str__(self):
-        return str(self.len) + ":" + chr(160) + "".join(self.body_dict.values())
+        s = "".join(self.body_dict.values()) 
+        s = g.SUNKEN * self.len
+        if not all((ele == g.HIT for ele in self.body_dict.values())):
+            s = BODY * self.len      
+        return str(self.len) + ":" + chr(160) + s
 
     def __repr__(self):
         return str(self.len) + ":" + chr(160) + "".join(self.body_dict.values())

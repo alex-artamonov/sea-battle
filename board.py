@@ -78,7 +78,7 @@ class Board:
         vacant_coords = list(self.coords_set - self.occupied_set)
         if not vacant_coords:
             raise exceptions.NoVacantCells()
-        max_attempts = 130
+        max_attempts = 300
         i = 0
         while True:
             ship.front = choice(vacant_coords)
@@ -96,6 +96,7 @@ class Board:
                 continue
 
     def try_place_ships(self, ships):
+        """размещает все корабли на поле"""
         count = 0
         for i, ship in enumerate(ships):
             if self.place_ship(ship):
@@ -157,17 +158,17 @@ class Board:
                     self.display_buffer(ship)
                     # self.cells[x][y], ship.body_dict[cell] = globals.SUNKEN, globals.SUNKEN
                     # возвращаем вызывавшей функции о подбитии корабля и его длине
-                    return globals.SUNKEN, ship.len, ship
+                    return globals.SUNKEN, ship.len
                 else:
-                    return globals.HIT, "", None
+                    return globals.HIT, ""
         #  возвращаем вызвавшей функции непосредственное  состояние обстрелянной точки
-        return self.cells[x][y], "", None  # длину сообщаем только в случае подбитого корабля
+        return self.cells[x][y], ""  # длину сообщаем только в случае подбитого корабля
 
-    def update_state(self, cell, ship):
-        x, y = cell
-        shot = {(x, y)}
-        if shot & ship.coords_set:
-            self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
+    # def update_state(self, cell, ship):
+    #     x, y = cell
+    #     shot = {(x, y)}
+    #     if shot & ship.coords_set:
+    #         self.cells[x][y], ship.body_dict[cell] = globals.HIT, globals.HIT
 
     def display_kill(self, ship):
         for s in ship.coords:
@@ -175,7 +176,6 @@ class Board:
 
     def display_buffer(self, ship):
         st = ship.buffer_cells_set & self.coords_set
-
         for cell in st:
             if cell not in self.used_cells:
-                self.cells[cell[0]][cell[1]] = "·"
+                self.cells[cell[0]][cell[1]] = globals.BUFFER

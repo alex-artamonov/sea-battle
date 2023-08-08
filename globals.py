@@ -6,10 +6,11 @@ BODY = "■"
 SUNKEN = "‡"
 HIT = "†"  # '*' #"‡"
 MISS = "-"
-UNKNOWN = '?'
+UNKNOWN = "?"
+BUFFER = "·"
 INP_INVITE = "\n?--> "
-QUIT = ["Q", "q", "Й", "й", 'quit', 'QUIT']
-MOVE_DICT = {MISS: "мимо", HIT: "ранен", SUNKEN: "подбит вражеский корабль длины "}
+QUIT = ["Q", "q", "Й", "й", "quit", "QUIT"]
+MOVE_DICT = {MISS: "мимо", HIT: "попал", SUNKEN: "подбит вражеский корабль длины "}
 
 
 def to_lines_by_limit(string, limit=60):
@@ -38,8 +39,8 @@ def to_lines_by_limit(string, limit=60):
 
 
 def print_side_by_side(str1, str2, divider="    |    "):
-    """Для вывода рядом двух досок. Выводит попеременно строки из двух строковых переменных
-    с указанным разделением между ними"""
+    """Для вывода рядом двух досок. Выводит попеременно строки из двух 
+    строковых переменных с указанным разделением между ними"""
     s1 = str1.split("\n")
     s2 = str2.split("\n")
 

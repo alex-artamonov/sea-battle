@@ -44,7 +44,7 @@ class Player:
             try:
                 mv = self.ask()
                 self.fired_at.add(mv)
-                result, ship_len, ship = self.their_board.take_fire(mv)
+                result, ship_len = self.their_board.take_fire(mv)
 
                 # ship_len = self.their_board.take_fire(mv)[1] # !! Lessson learned - double call lead to infinite cycle
                 if result == globals.SUNKEN:
@@ -53,14 +53,13 @@ class Player:
                     self.add_buffer_diagonals(mv)
                     self.add_buffer_endcells()
                     self.recent_hit, self.hits = None, []
-                    
+
                 if result == globals.HIT:
                     self.recent_hit = mv
                     self.hits.append(mv)
                     self.add_buffer_diagonals(mv)
                     # self.probable_hits = self.predict_set()
-                    
-                    
+
                 self.message = f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!"
                 return
                 # return
@@ -71,47 +70,50 @@ class Player:
                 print("Координаты за пределами поля.", msg, "move: ", mv)
                 continue
             except ValueError as e:
-                # print("Введано неверное значение координат.", msg)
+                print("Введано неверное значение координат.", msg)
                 print(e)
                 continue
-
 
     def add_buffer_diagonals(self, cell):
         self.buffer_cells = self.buffer_cells | (
             {
-            (cell[0] - 1, cell[1] - 1),
-            (cell[0] - 1, cell[1] + 1),
-            (cell[0] + 1, cell[1] - 1),
-            (cell[0] + 1, cell[1] + 1),
-            } & self.allowed_moves
+                (cell[0] - 1, cell[1] - 1),
+                (cell[0] - 1, cell[1] + 1),
+                (cell[0] + 1, cell[1] - 1),
+                (cell[0] + 1, cell[1] + 1),
+            }
+            & self.allowed_moves
         )
 
     def add_buffer_endcells(self):
-        self.buffer_cells = self.buffer_cells | (self.predict_set() & self.allowed_moves)
-    
+        self.buffer_cells = self.buffer_cells | (
+            self.predict_set() & self.allowed_moves
+        )
+
     def predict_set(self):
-    # output = []
-    # coords = ship.coords
-    # print(coords)
+        # output = []
+        # coords = ship.coords
+        # print(coords)
         coords = sorted(self.hits)
         if len(coords) == 1:
-            output = {(coords[0][0] - 1,coords[0][1]), 
-                        (coords[0][0] + 1,coords[0][1]),
-                        (coords[0][0], coords[0][1] - 1),
-                        (coords[0][0], coords[0][1] + 1)}
+            output = {
+                (coords[0][0] - 1, coords[0][1]),
+                (coords[0][0] + 1, coords[0][1]),
+                (coords[0][0], coords[0][1] - 1),
+                (coords[0][0], coords[0][1] + 1),
+            }
         elif coords[0][0] == coords[-1][0]:
             output = {
-                    (coords[0][0], coords[0][1] - 1),
-                    (coords[-1][0], coords[-1][1] + 1)
-                        }
+                (coords[0][0], coords[0][1] - 1),
+                (coords[-1][0], coords[-1][1] + 1),
+            }
         else:
             output = {
-                    (coords[0][0] - 1, coords[0][1]),
-                    (coords[-1][0] + 1, coords[-1][1])
-                        }
+                (coords[0][0] - 1, coords[0][1]),
+                (coords[-1][0] + 1, coords[-1][1]),
+            }
         # output = set(output)
         return output
-
 
     def ask(self):
         return NotImplemented
@@ -133,22 +135,18 @@ class User(Player):
         else:
             move = (int(move[0]) - 1, int(move[1]) - 1)
             return move
-        
-    
 
 
 class AI(Player):
-    
-
     def ask(self):
         """реализация родительского метода-заглушки в классе AI"""
         # self.hits = []
-        
+
         side = self.their_board.side
         self.allowed_moves = self.allowed_moves - self.fired_at
 
         if self.recent_hit:
-            self.probable_hits = (self.predict_set() - self.buffer_cells)
+            self.probable_hits = self.predict_set() - self.buffer_cells
             # print(f"{self.recent_hit=}, {self.hits=}")
             # print(f"{self.predict_set()=}")
             # print(f"{self.buffer_cells=}")
@@ -158,24 +156,5 @@ class AI(Player):
         else:
             # print(f"random move minus {self.buffer_cells=}")
             return choice(list(self.allowed_moves - self.buffer_cells))
-        # if self.recent_hit:
-        #     print("recent hit:", self.recent_hit)
-        #     if self.recent_hit not in self.hits:
-        #         self.hits.append(self.recent_hit)
-        # print(self.hits)
-        # if self.probable_hits:            
-        #     self.probable_hits = allowed_moves & self.probable_hits
-        #     print(self.recent_hit, self.hits, self.probable_hits)
-        #     print("Hint: try", choice(list(self.predict_set())))
-
-        # чтобы совсем не палить случайноым образом, ограничиваем до возможных ходов:
-        # lst_moves = list(
-        #     (
-        #     allowed_moves
-        #     # & self.probable_hits # пересечение множества допустимых с рекомендуемыми
-        #     )
-        # )
         move = choice(list(allowed_moves))
         return move
-    
-    
