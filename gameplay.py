@@ -16,9 +16,10 @@ COMPUTER = "COMPUTER_NAME"
 HUMAN = "HUMAN_NAME"
 FIELD_SIZE = "FIELD_SIZE"
 fleet_dict = {3: 1, 2: 3, 1: 3} #type of ship: ship count
+fleet_dict = {2: 1, 1: 2} #type of ship: ship count
 ship_count = sum(fleet_dict.values())
 
-gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 6}
+gameplay_dict = {COMPUTER: "A.I. Computer", HUMAN: "human", FIELD_SIZE: 3}
 
 
 def greeting():
