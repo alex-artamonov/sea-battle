@@ -66,8 +66,9 @@ class Player:
             except exceptions.PointHitAlready as e:
                 print(e, msg)
                 continue
-            except IndexError:
+            except IndexError as e:
                 print("Координаты за пределами поля.", msg, "move: ", mv)
+                print(e)
                 continue
             except ValueError as e:
                 print("Введано неверное значение координат.", msg)
@@ -94,6 +95,7 @@ class Player:
         # output = []
         # coords = ship.coords
         # print(coords)
+        
         coords = sorted(self.hits)
         if len(coords) == 1:
             output = {
@@ -141,7 +143,7 @@ class AI(Player):
     def ask(self):
         """реализация родительского метода-заглушки в классе AI"""
         # self.hits = []
-
+        print("Computer, огонь!")
         side = self.their_board.side
         self.allowed_moves = self.allowed_moves - self.fired_at
 
