@@ -17,7 +17,7 @@ fleet_dict = {3: 1, 2: 3, 1: 3}  # type of ship: ship count
 fleet_dict = {2: 1, 1: 2}  # type of ship: ship count
 ship_count = sum(fleet_dict.values())
 last_time_began = None
-gameplay_dict = {COMPUTER: "Computer", HUMAN: "human", FIELD_SIZE: 4}
+gameplay_dict = {COMPUTER: "Computer", HUMAN: "human", FIELD_SIZE: 3}
 
 
 def greeting():
@@ -126,7 +126,6 @@ def gameplay():
     # выводим доски рядом
     
     g.print_side_by_side(str(brd_computer), str(brd_human))
-    # usr = User(brd_human, brd_computer, gameplay_dict[HUMAN])
     usr = User(brd_human, brd_computer, gameplay_dict[HUMAN])
     ai = AI(brd_computer, brd_human, gameplay_dict["COMPUTER_NAME"])
 
@@ -140,11 +139,8 @@ def gameplay():
 
     # обработка и смена ходов
     move_number = 0
-    endgame = False
+
     while current_player.their_board.has_ships_afloat:
-        if endgame:
-            current_player = next_player
-            break
         try:
             move_number += 1
             current_player.move()
@@ -154,12 +150,15 @@ def gameplay():
                 current_player.just_killed_a_ship
                 # and current_player.their_board.has_ships_afloat
             ):
+                # next_player = current_player
+                # print('after next = current:')
+                # print(get_message())
+                next_player.message = current_player.message
                 if not current_player.their_board.has_ships_afloat:
-                    # print('supposed to be the end of game')
-                    # endgame = True
-                    # break
-                    print(f"Победу одержал {current_player.name}:")
+                    
                     g.print_side_by_side(str(brd_computer), str(brd_human))
+                    print(msg)
+                    print(f"Победу одержал {current_player.name}")
                     update_score(current_player.name)
                     print_score()
                     # exit()
@@ -270,15 +269,20 @@ def print_score():
 def play_again_or_leave():
     """Gives a choice to the user to continue or quit."""
     human_name = gameplay_dict[HUMAN]
-    print("Сыграем еще? (Y/n)")
-    reply = input(g.INP_INVITE).upper().strip()
-    yes = reply in ("Y", "")
-    if yes:
-        print("Отлично, следующая игра!")
-        gameplay()
-    else:
-        print(f"Ну ладно, пока, {human_name}!")
-        exit()
+    
+    
+    # yes = reply in ("Y", "")
+    while True:
+        print("Сыграем еще? (Y/n)")
+        reply = input(g.INP_INVITE).upper().strip()
+        if reply in ("Y", ""):
+            print("Отлично, следующая игра!")
+            gameplay()
+        elif reply == 'N':
+            print(f"Ну ладно, пока, {human_name}!")
+            exit()
+        else:
+            print("Не понял ответа.")
 
 
 def start_game():
