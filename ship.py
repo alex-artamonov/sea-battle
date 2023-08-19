@@ -4,8 +4,6 @@ import globals as g
 
 BODY = "■"
 # =======================================
-
-
 class Ship:
     """Корабль
     Аттрибуты:
@@ -23,26 +21,12 @@ class Ship:
         self.direction = direction
         # self.board_size = board_size
         self._max_len = max_len
-        self.len = length
+        self._len = length
         self.body_dict = {}
 
    
     def __len__(self):
         return self._len
-
-    @property
-    def len(self):
-        return self._len
-
-    @len.setter
-    def len(self, value):
-        if not (0 < value <= self._max_len):
-            raise ValueError(
-                f"Корабль длины {value} за пределами допустимой длины от 1 до {self._max_len}!"
-            )
-        else:
-            self._len = value
-        
 
     @property
     def coords(self):
@@ -82,13 +66,13 @@ class Ship:
 
     def __str__(self):
         s = "".join(self.body_dict.values())
-        s = g.SUNKEN * self.len
+        s = g.SUNKEN * self._len
         if not all((ele == g.HIT for ele in self.body_dict.values())):
-            s = BODY * self.len
-        return str(self.len) + ":" + chr(160) + s
+            s = BODY * self._len
+        return str(self._len) + ":" + chr(160) + s
 
     def __repr__(self):
-        return str(self.len) + ":" + chr(160) + "".join(self.body_dict.values())
+        return str(self._len) + ":" + chr(160) + "".join(self.body_dict.values())
 
     @property
     def buffer_cells_set(self):

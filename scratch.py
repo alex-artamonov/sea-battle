@@ -132,4 +132,111 @@ def rand():
     # print(two())
 
 
-rand()
+# rand()
+
+class Test:
+   common = 1
+   def get_common(self):
+     return self.common
+   
+t = Test()
+print(t.get_common())
+
+class Player:
+    memory = []
+    def move(self, reply):
+        # print(request)
+        move = input('your move?\t')
+        response = reply()
+        self.memory.append((move, response))
+    def get_memory(self):
+        return self.memory
+
+
+class Player:
+    memory = {}
+    def move(self):
+        # print(request)
+        move = input('your move?\t')
+        self.memory[move] = None
+        return move
+    def write_response(self, move, response):
+        self.memory[move] = response
+
+    def get_memory(self):
+        return self.memory
+
+
+
+p = Player()
+
+# question = input('Move?.\n')
+def my_input(question=''):
+    q = input(question)
+    if q == 'q':
+        exit()
+    return q
+# while True:
+#     res = p.move(my_input)
+#     print('res:', res)
+#     mem = p.get_memory()
+#     print(mem)
+
+#     if mem[-1][1] == 'q':
+#         break
+# while True:
+#     move = p.move()
+#     reply = input('Result?\t')
+#     if reply == 'q':
+#         break
+#     p.write_response(move, reply)
+# print(p.get_memory())
+
+
+import globals as g
+EMPTY = 'o'
+lst = [g.HIT, g.BUFFER, g.BODY]
+from random import choice, sample
+
+side = 6
+cells = [list(EMPTY * side) for _ in range(side)]
+print(cells)
+divider = '|'
+output = ''
+display_ships = True
+for i, line in enumerate(cells):
+    if display_ships:
+        inner = ((cell if cell != g.BUFFER else EMPTY) for cell in line)
+    else:
+        inner = (
+            (cell if cell != globals.BODY and cell != g.BUFFER else EMPTY)
+            for cell in line
+        )
+
+    inner = divider.join(inner) + divider
+    output += str(i + 1).rjust(2) + " " + inner + "\n"  # нумеруем строки с 1
+# print(output)
+
+# for i, line in enumerate(cells):
+#     ln = '|'.join(line)
+#     print(ln)
+# for line in inner:
+#     for ele in line:
+#         print(ele)
+dct = {(x,y): 'o' for x in range(side) for y in range(side)}
+print(dct)
+output = ''
+for x in range(side):
+    inner = (dct[(x, y)] if dct[(x, y)] != g.BUFFER else EMPTY for y in range(side))
+    inner = divider.join(inner) + divider
+    output += str(x + 1).rjust(2) + " " + inner + "\n"
+print(output)
+# def to_lists(dct):
+#     global side
+#     output = []
+#     for x in range(side):
+#         output.append([dct[(x, y)] for y in range(side)])
+#     return output
+
+# lists = to_lists(dct)
+# print(lists)

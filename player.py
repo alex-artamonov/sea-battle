@@ -17,6 +17,8 @@ class Player:
         - ask: запрос хода от игрока - заглушка для реализации метода потомком
         - move: вызов self.ask, their_board.fire
     """
+    MY_MOVES = 'my_moves'
+    THEIR_SHIPS = 'their_ships'
 
     def __init__(self, my_board: Board, their_board: Board, name="human"):
         self.name = name
@@ -31,6 +33,9 @@ class Player:
         self.hits = []
         self.probable_hits = set()
         self.buffer_cells = set()
+        ships = their_board.ship_list
+        self.memory = {self.THEIR_SHIPS: ships, self.MY_MOVES:{}}
+        self.their_board_rev_eng = Board(their_board.player, their_board.side)
 
     def move(self):
         """Вызываем метод ask, делаем выстрел по вражеской доске
@@ -44,8 +49,11 @@ class Player:
             try:
                 mv = self.ask()
                 self.fired_at.add(mv)
+                
                 result, ship_len = self.their_board.take_fire(mv)
-
+                self.memory[self.MY_MOVES][mv] = result
+                self.their_board_rev_eng.cells[mv] = result
+                
                 # ship_len = self.their_board.take_fire(mv)[1] # !! Lessson learned - double call lead to infinite cycle
                 if result == globals.SUNKEN:
                     self.just_killed_a_ship = True
@@ -75,6 +83,10 @@ class Player:
                 print(e)
                 continue
 
+    def input_response(self, move, response):
+        self.memory[self.MY_MOVES][move] = response
+        print('my memory:', self.memory)
+
     def add_buffer_diagonals(self, cell):
         self.buffer_cells = self.buffer_cells | (
             {
@@ -85,11 +97,17 @@ class Player:
             }
             & self.allowed_moves
         )
+        self.their_board_refresh_buffer_cells()
 
     def add_buffer_endcells(self):
         self.buffer_cells = self.buffer_cells | (
             self.predict_set() & self.allowed_moves
         )
+        self.their_board_refresh_buffer_cells()
+
+    def their_board_refresh_buffer_cells(self):
+        for cell in self.buffer_cells:
+            self.their_board_rev_eng.cells[cell] = globals.BUFFER
 
     def predict_set(self):
         # output = []
@@ -140,36 +158,33 @@ class User(Player):
 
 
 class AI(Player):
+    
     def __init__(self, my_board: Board, their_board: Board, name="human"):
         super().__init__(my_board, their_board, name)
-        # self.memory = dict(their_ships = [], my_moves = [])
-        ships = their_board.ship_list
+        ships = self.memory[self.THEIR_SHIPS]
         for ship in ships:
             print(f"{len(ship)=}, {ship.coords=}, {ship.front=}, {ship.body_dict=},{ship.direction=}")
         print('ship lengths:')
         [print(len(ship)) for ship in ships]
-        self.memory = dict(their_ships = ships)
-        print('my memory:', self.memory)
+        print('AI: my memory at __init__:', self.memory)
         self.cheat_move = self.cheat()
+        print('AI: Their board reveng?:\n', self.their_board_rev_eng.cells)
+
 
     def ask(self):
-        # n = choice((1,2))
-        # if n == 1:
-        #     print('odd')
-        #     move = self.smart_move()
-        # else:
-        #     print('even')
-        #     move = self.cheating()
-        #
-        fun = choices((self.smart_move, self.cheating), weights=(1, 9),k=1)[0]
-        move = fun()
+        print('AI: my memory before before calculating move: \n', self.memory)
+        print('AI: their_board_rev_eng:]\n', self.their_board_rev_eng.cells)
+        print('AI:\n', self.their_board_rev_eng)
+        func = choices((self.smart_move, self.cheating), weights=(1, 2),k=1)[0]
+        move = func()
         print(f"hi from ask. The move should be {move}")
         return move
+    
 
     def smart_move(self):
         """реализация родительского метода-заглушки в классе AI"""
         # self.hits = []
-        print("Computer, огонь!")
+        print("My turn!")
         print("smart move")
         # move = next(self.cheat_moves())
         # print(move)
@@ -207,6 +222,11 @@ class AI(Player):
             for cell in cells
         )
 
-    # @property
-    # def memory(self):
-    #     n = 'asdf'
+
+# def get_diagonal_cells(self, cell):
+#     return [
+#         (cell[0] - 1, cell[1] - 1),
+#         (cell[0] - 1, cell[1] + 1),
+#         (cell[0] + 1, cell[1] - 1),
+#         (cell[0] + 1, cell[1] + 1),
+#         ]

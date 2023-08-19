@@ -219,10 +219,10 @@ def place_ships(board, ships):
         except exceptions.PointUsedAlready as e:
             print(e)
             continue
-        except Exception as e:
-            print("Возникла неожиданная ситуация. Игра завершается")
-            print(e)
-            exit()
+        # except Exception as e:
+        #     print("Возникла неожиданная ситуация. Игра завершается")
+        #     print(e)
+        #     exit()
         else:
             msg = (
                 f"Все корабли на доске игрока '{board.player}' "
