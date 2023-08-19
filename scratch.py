@@ -1,4 +1,5 @@
 from ship import Ship
+from random import choice
 
 s = Ship(3, front=(2, 3))
 s2 = Ship(2, direction="V", front=(1, 3))
@@ -59,9 +60,9 @@ def add_buffer_endcells(buffer_set, ship: list):
 s3 = Ship(1, front=(2, 2))
 
 t1, t2, t3 = [(1, 3), (1, 2)], [(4, 2), (3, 2)], [(4, 4)]
-print(t1, predict_set(t1))
-print(t2, predict_set(t2))
-print(t3, predict_set(t3))
+# print(t1, predict_set(t1))
+# print(t2, predict_set(t2))
+# print(t3, predict_set(t3))
 
 # print(s.coords, s.direction)
 # # print(get_direction(s))
@@ -72,12 +73,63 @@ print(t3, predict_set(t3))
 # print(s3.coords, s3.direction)
 # # print(get_direction(s3))
 # print(predict_set(s3.coords))
-buffer = []
-cell = (3, 3)
-add_buffer_diagonal(buffer, cell)
-print(buffer)
-buffer_set = set()
-print(buffer_set)
-add_buffer_endcells(buffer_set, t3)
+# buffer = []
+# cell = (3, 3)
+# add_buffer_diagonal(buffer, cell)
+# print(buffer)
+# buffer_set = set()
+# print(buffer_set)
+# add_buffer_endcells(buffer_set, t3)
 
-print(t3, buffer_set)
+# print(t3, buffer_set)
+
+
+class Test_cheat:
+    def __init__(self) -> None:
+        self.cheat_move = self.cheat()
+
+    def cheat(self):
+        return (x for x in range(10))
+
+    def cheating(self):
+        print("cheating")
+        return str(next(self.cheat_move))
+
+    def no_cheat(self):
+        # print('no cheat')
+        return "no cheat"
+
+    def rand_move(self):
+        n = choice((1, 2))
+        if n == 1:
+            return self.cheating()
+        else:
+            return self.no_cheat()
+
+
+tst = Test_cheat()
+# tst.cheating()
+# tst.cheating()
+# tst.cheating()
+# tst.no_cheat()
+# for i in range(8):
+#     print(tst.rand_move())
+
+
+def one():
+    return "first"
+
+
+def two():
+    return "second"
+
+
+def rand():
+    # result = choice((one, two))
+    lst = [one, two]
+    result = choice(lst)
+    print(result())
+    # print(two())
+
+
+rand()

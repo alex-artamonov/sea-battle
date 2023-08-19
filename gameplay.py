@@ -64,16 +64,17 @@ def who_first(usr, ai):
         )
         print(g.to_lines_by_limit(msg))
         ALLOWED_BETS = ("1", "2")
-        flip_coin = choice(ALLOWED_BETS)
-        while True:
-            bet = input(g.INP_INVITE)
-            if bet in ALLOWED_BETS:
-                break
-            elif bet in g.QUIT:
-                print(f"До следующего раза, {usr.name}")
-                exit()
-            else:
-                print("Попробуйте еще")
+        # flip_coin = choice(ALLOWED_BETS)
+        # while True:
+        #     bet = input(g.INP_INVITE)
+        #     if bet in ALLOWED_BETS:
+        #         break
+        #     elif bet in g.QUIT:
+        #         print(f"До следующего раза, {usr.name}")
+        #         exit()
+        #     else:
+        #         print("Попробуйте еще")
+        bet, flip_coin = 1, 2
         if bet == flip_coin:
             last_time_began = usr
             msg = "Угадали! Первый ход - ваш."
@@ -91,6 +92,19 @@ def who_first(usr, ai):
         else:
             last_time_began = ai
             return ai, usr, f"На этот раз первый ход мой."
+
+
+def pause():
+
+    while True:
+        _ = input("Press <Enter> to continue.\n")
+        if _ == "":
+            break
+    # system("clear")
+
+
+def initialize():
+    pass
 
 
 def gameplay():
@@ -124,7 +138,8 @@ def gameplay():
     brd_human.display_ships = True
 
     # выводим доски рядом
-    
+    pause()
+    # system('clear')
     g.print_side_by_side(str(brd_computer), str(brd_human))
     usr = User(brd_human, brd_computer, gameplay_dict[HUMAN])
     ai = AI(brd_computer, brd_human, gameplay_dict["COMPUTER_NAME"])
@@ -143,9 +158,11 @@ def gameplay():
     while current_player.their_board.has_ships_afloat:
         try:
             move_number += 1
+            pause()
             current_player.move()
             msg = get_message()
             # print(msg)
+
             while (
                 current_player.just_killed_a_ship
                 # and current_player.their_board.has_ships_afloat
@@ -155,7 +172,7 @@ def gameplay():
                 # print(get_message())
                 next_player.message = current_player.message
                 if not current_player.their_board.has_ships_afloat:
-                    
+                    # system('clear')
                     g.print_side_by_side(str(brd_computer), str(brd_human))
                     print(msg)
                     print(f"Победу одержал {current_player.name}")
@@ -169,15 +186,16 @@ def gameplay():
                 print(
                     f"Отличный выстрел, {current_player.name}! За это полагается бонусный ход!"
                 )
+                pause()
                 current_player.move()
                 msg = get_message()
         except (exceptions.PointHitAlready, IndexError, ValueError) as e:
             print(e, " - try again!")
             continue
-        except Exception as e:
-            # При непредвиденной ошибке
-            print(e)
-            exit()
+        # except Exception as e:
+        #     # При непредвиденной ошибке
+        #     print(e)
+        #     exit()
         else:
             current_player, next_player = next_player, current_player
             # system("clear")
@@ -195,7 +213,7 @@ def place_ships(board, ships):
             number_of_attempts += 1
             board.try_place_ships(ships)
         except (exceptions.FailedToPlaceAllShips, exceptions.NoVacantCells) as e:
-            print(e)
+            # print(e)
             board.clear()
             continue
         except exceptions.PointUsedAlready as e:
@@ -220,7 +238,7 @@ def place_ships(board, ships):
 
 def create_score():
     """Creates the score"""
-    
+
     global gameplay_dict
     global score
     score[gameplay_dict[HUMAN]], score[gameplay_dict[COMPUTER]] = 0, 0
@@ -269,8 +287,7 @@ def print_score():
 def play_again_or_leave():
     """Gives a choice to the user to continue or quit."""
     human_name = gameplay_dict[HUMAN]
-    
-    
+
     # yes = reply in ("Y", "")
     while True:
         print("Сыграем еще? (Y/n)")
@@ -278,7 +295,7 @@ def play_again_or_leave():
         if reply in ("Y", ""):
             print("Отлично, следующая игра!")
             gameplay()
-        elif reply == 'N':
+        elif reply in (g.QUIT + ["N"]):
             print(f"Ну ладно, пока, {human_name}!")
             exit()
         else:
@@ -288,8 +305,11 @@ def play_again_or_leave():
 def start_game():
     system("clear")
     greeting()
+    # pause()
     create_score()
     print_score()
+    pause()
+    # system("clear")
     gameplay()
     while True:
         play_again_or_leave()

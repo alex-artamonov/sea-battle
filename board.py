@@ -97,6 +97,7 @@ class Board:
 
     def try_place_ships(self, ships):
         """размещает все корабли на поле"""
+        self.ship_list = ships
         count = 0
         for i, ship in enumerate(ships):
             if self.place_ship(ship):

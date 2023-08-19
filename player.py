@@ -1,7 +1,7 @@
 from board import Board
 import globals
 import exceptions
-from random import choice
+from random import choice, choices
 from globals import MOVE_DICT
 from globals import ai_to_user
 from ship import Ship
@@ -95,7 +95,7 @@ class Player:
         # output = []
         # coords = ship.coords
         # print(coords)
-        
+
         coords = sorted(self.hits)
         if len(coords) == 1:
             output = {
@@ -140,11 +140,41 @@ class User(Player):
 
 
 class AI(Player):
+    def __init__(self, my_board: Board, their_board: Board, name="human"):
+        super().__init__(my_board, their_board, name)
+        # self.memory = dict(their_ships = [], my_moves = [])
+        ships = their_board.ship_list
+        for ship in ships:
+            print(f"{len(ship)=}, {ship.coords=}, {ship.front=}, {ship.body_dict=},{ship.direction=}")
+        print('ship lengths:')
+        [print(len(ship)) for ship in ships]
+        self.memory = dict(their_ships = ships)
+        print('my memory:', self.memory)
+        self.cheat_move = self.cheat()
+
     def ask(self):
+        # n = choice((1,2))
+        # if n == 1:
+        #     print('odd')
+        #     move = self.smart_move()
+        # else:
+        #     print('even')
+        #     move = self.cheating()
+        #
+        fun = choices((self.smart_move, self.cheating), weights=(1, 9),k=1)[0]
+        move = fun()
+        print(f"hi from ask. The move should be {move}")
+        return move
+
+    def smart_move(self):
         """реализация родительского метода-заглушки в классе AI"""
         # self.hits = []
         print("Computer, огонь!")
-        side = self.their_board.side
+        print("smart move")
+        # move = next(self.cheat_moves())
+        # print(move)
+        # print('my next move would be:', next(self.cheat_move))
+        # side = self.their_board.side
         self.allowed_moves = self.allowed_moves - self.fired_at
 
         if self.recent_hit:
@@ -156,7 +186,27 @@ class AI(Player):
             print(f"calculated moves:{self.probable_hits=}")
             return choice(list(self.probable_hits))
         else:
-            # print(f"random move minus {self.buffer_cells=}")
+            print(f"random move minus {self.buffer_cells=}")
             return choice(list(self.allowed_moves - self.buffer_cells))
-        move = choice(list(allowed_moves))
+
+    def cheating(self):
+        print("I'm cheating!")
+        # print(self.their_board.ship_sets)
+        move = next(self.cheat_move)
+        while move in self.fired_at:
+            move = next(self.cheat_move)
         return move
+
+    def cheat(self):
+        print("hi from cheat mode")
+        # print(self.their_board.ship_sets)
+        # print(self.their_board.ships)
+        return (
+            cell for cells 
+            in sorted(self.their_board.ship_sets, key=len, reverse=True)
+            for cell in cells
+        )
+
+    # @property
+    # def memory(self):
+    #     n = 'asdf'

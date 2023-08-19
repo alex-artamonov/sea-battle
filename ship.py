@@ -1,6 +1,7 @@
 # import exceptions
 # from board import BODY
 import globals as g
+
 BODY = "■"
 # =======================================
 
@@ -25,6 +26,10 @@ class Ship:
         self.len = length
         self.body_dict = {}
 
+   
+    def __len__(self):
+        return self._len
+
     @property
     def len(self):
         return self._len
@@ -37,6 +42,7 @@ class Ship:
             )
         else:
             self._len = value
+        
 
     @property
     def coords(self):
@@ -75,10 +81,10 @@ class Ship:
         return self.nbr_lives > 0
 
     def __str__(self):
-        s = "".join(self.body_dict.values()) 
+        s = "".join(self.body_dict.values())
         s = g.SUNKEN * self.len
         if not all((ele == g.HIT for ele in self.body_dict.values())):
-            s = BODY * self.len      
+            s = BODY * self.len
         return str(self.len) + ":" + chr(160) + s
 
     def __repr__(self):
