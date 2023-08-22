@@ -13,11 +13,11 @@ score = {}
 COMPUTER = "COMPUTER_NAME"
 HUMAN = "HUMAN_NAME"
 FIELD_SIZE = "FIELD_SIZE"
-fleet_dict = {3: 1, 2: 3, 1: 3}  # type of ship: ship count
-fleet_dict = {2: 1, 1: 2}  # type of ship: ship count
+fleet_dict = {4:1, 3: 2, 2: 3, 1: 3}  # type of ship: ship count
+fleet_dict = {3: 1, 1: 2}  # type of ship: ship count
 ship_count = sum(fleet_dict.values())
 last_time_began = None
-gameplay_dict = {COMPUTER: "Computer", HUMAN: "human", FIELD_SIZE: 3}
+gameplay_dict = {COMPUTER: "Computer", HUMAN: "human", FIELD_SIZE: 4}
 
 
 def greeting():
@@ -50,7 +50,7 @@ def greeting():
 def populate_fleet(lst):
     for ele in fleet_dict:
         for i in range(fleet_dict[ele]):
-            lst.append(Ship(ele, choice(["H", "V"])))
+            lst.append(Ship(ele, choice(g.DIRECTIONS)))
 
 
 def who_first(usr, ai):
@@ -124,11 +124,11 @@ def gameplay():
     except Exception as e:
         print(
             g.to_lines_by_limit(
-                "Возникла непредвиденная ситуация: видимо, "
-                "не удалось расставить корабли. Игра завершается."
+                "Возникла непредвиденная ситуация. Игра завершается."
             )
         )
         print(e)
+        pass
         exit()
         # ships =
         # ships2 =
@@ -197,39 +197,47 @@ def gameplay():
         #     print(e)
         #     exit()
         else:
-            current_player, next_player = next_player, current_player
+            # current_player, next_player = next_player, current_player
             # system("clear")
             g.print_side_by_side(str(brd_computer), str(brd_human))
             print(msg)
     # print(f"Победу одержал {current_player.name}")
 
 
-def place_ships(board, ships):
+def place_ships(board: Board, ships):
     """Обертка для размещения кораблей на игровом поле"""
 
-    number_of_attempts = 0
-    while True:
-        try:
-            number_of_attempts += 1
-            board.try_place_ships(ships)
-        except (exceptions.FailedToPlaceAllShips, exceptions.NoVacantCells) as e:
-            # print(e)
-            board.clear()
-            continue
-        except exceptions.PointUsedAlready as e:
-            print(e)
-            continue
-        # except Exception as e:
-        #     print("Возникла неожиданная ситуация. Игра завершается")
-        #     print(e)
-        #     exit()
-        else:
-            msg = (
+    if board.place_ships(ships):
+        msg = (
                 f"Все корабли на доске игрока '{board.player}' "
-                f"были успешно размещены случайным образом. Число попыток: {number_of_attempts}"
+                f"были успешно размещены случайным образом."
             )
-            print(g.to_lines_by_limit(msg))
-            break
+    else:
+        msg = 'случилась какая-то хуйня'
+    print(g.to_lines_by_limit(msg))
+    # number_of_attempts = 0
+    # while True:
+    #     try:
+    #         number_of_attempts += 1
+    #         board.try_place_ships(ships)
+    #     except (exceptions.FailedToPlaceAllShips, exceptions.NoVacantCells) as e:
+    #         # print(e)
+    #         board.clear()
+    #         continue
+    #     except exceptions.PointUsedAlready as e:
+    #         print(e)
+    #         continue
+    #     # except Exception as e:
+    #     #     print("Возникла неожиданная ситуация. Игра завершается")
+    #     #     print(e)
+    #     #     exit()
+    #     else:
+    #         msg = (
+    #             f"Все корабли на доске игрока '{board.player}' "
+    #             f"были успешно размещены случайным образом. Число попыток: {number_of_attempts}"
+    #         )
+    #         print(g.to_lines_by_limit(msg))
+    #         break
 
 
 # def get_possible_coords():

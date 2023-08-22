@@ -1,5 +1,5 @@
-from board import Board
-import globals
+import board as b
+import globals as g
 import exceptions
 from random import choice, choices
 from globals import MOVE_DICT
@@ -17,10 +17,12 @@ class Player:
         - ask: запрос хода от игрока - заглушка для реализации метода потомком
         - move: вызов self.ask, their_board.fire
     """
-    MY_MOVES = 'my_moves'
-    THEIR_SHIPS = 'their_ships'
 
-    def __init__(self, my_board: Board, their_board: Board, name="human"):
+    MY_MOVES = "my_moves"
+    THEIR_SHIPS = "their_ships"
+    SMOKING_SHIP = 'smoking_ship'
+
+    def __init__(self, my_board: b.Board, their_board: b.Board, name="human"):
         self.name = name
         self.my_board = my_board
         self.their_board = their_board
@@ -33,9 +35,11 @@ class Player:
         self.hits = []
         self.probable_hits = set()
         self.buffer_cells = set()
-        ships = their_board.ship_list
-        self.memory = {self.THEIR_SHIPS: ships, self.MY_MOVES:{}}
-        self.their_board_rev_eng = Board(their_board.player, their_board.side)
+        ships = [len(ship) for ship in their_board.ship_list]
+        self.memory = {self.THEIR_SHIPS: ships, 
+                       self.MY_MOVES: {}, 
+                       self.SMOKING_SHIP: [],}
+        self.their_board_rev_eng = b.Board(their_board.player, their_board.side)
 
     def move(self):
         """Вызываем метод ask, делаем выстрел по вражеской доске
@@ -49,23 +53,23 @@ class Player:
             try:
                 mv = self.ask()
                 self.fired_at.add(mv)
-                
                 result, ship_len = self.their_board.take_fire(mv)
                 self.memory[self.MY_MOVES][mv] = result
                 self.their_board_rev_eng.cells[mv] = result
-                
-                # ship_len = self.their_board.take_fire(mv)[1] # !! Lessson learned - double call lead to infinite cycle
-                if result == globals.SUNKEN:
-                    self.just_killed_a_ship = True
-                    self.hits.append(mv)
-                    self.add_buffer_diagonals(mv)
-                    self.add_buffer_endcells()
-                    self.recent_hit, self.hits = None, []
 
-                if result == globals.HIT:
+                # ship_len = self.their_board.take_fire(mv)[1] # !! Lesson learned - double call lead to infinite cycle
+                if result == g.SUNKEN:
+                    self.bury_ship(ship_len, mv)
+                    print('=========move==SUNKEN', self.memory)                    
+                    print('From move: their ships afloat:', self.memory[self.THEIR_SHIPS])
+
+                if result == g.HIT:                                      
                     self.recent_hit = mv
                     self.hits.append(mv)
                     self.add_buffer_diagonals(mv)
+                    self.memory[self.SMOKING_SHIP].append(mv) 
+                    print('=========move===hit', self.memory)
+                    
                     # self.probable_hits = self.predict_set()
 
                 self.message = f"Игрок {self.name}, ход '{ai_to_user(mv)}': {MOVE_DICT[result]}{ship_len}!"
@@ -85,7 +89,7 @@ class Player:
 
     def input_response(self, move, response):
         self.memory[self.MY_MOVES][move] = response
-        print('my memory:', self.memory)
+        print("my memory:", self.memory)
 
     def add_buffer_diagonals(self, cell):
         self.buffer_cells = self.buffer_cells | (
@@ -107,13 +111,9 @@ class Player:
 
     def their_board_refresh_buffer_cells(self):
         for cell in self.buffer_cells:
-            self.their_board_rev_eng.cells[cell] = globals.BUFFER
+            self.their_board_rev_eng.cells[cell] = g.BUFFER
 
     def predict_set(self):
-        # output = []
-        # coords = ship.coords
-        # print(coords)
-
         coords = sorted(self.hits)
         if len(coords) == 1:
             output = {
@@ -132,18 +132,30 @@ class Player:
                 (coords[0][0] - 1, coords[0][1]),
                 (coords[-1][0] + 1, coords[-1][1]),
             }
-        # output = set(output)
         return output
+    
+    def bury_ship(self, ship_len, move):
+        self.just_killed_a_ship = True
+        self.hits.append(move)
+        self.add_buffer_diagonals(move)
+        self.add_buffer_endcells()
+        self.recent_hit, self.hits = None, []
+        ship_coords = self.memory[self.SMOKING_SHIP]
+        for cell in ship_coords:
+            self.their_board_rev_eng.cells[cell] = g.SUNKEN
+        self.memory[self.THEIR_SHIPS].remove(ship_len)
+        self.memory[self.SMOKING_SHIP] = [] #dubious logic - it can be a different ship
 
     def ask(self):
         return NotImplemented
+    
 
 
 class User(Player):
     def ask(self):
         """реализация родительского метода-заглушки в классе User"""
-        move = input(f"{self.name}! Огонь!{globals.INP_INVITE}\t")
-        if move in globals.QUIT:
+        move = input(f"{self.name}! Огонь!{g.INP_INVITE}\t")
+        if move in g.QUIT:
             print(f"Спасибо за игру, {self.name}!")
             exit()
         side = (
@@ -158,28 +170,23 @@ class User(Player):
 
 
 class AI(Player):
-    
-    def __init__(self, my_board: Board, their_board: Board, name="human"):
+    def __init__(self, my_board: b.Board, their_board: b.Board, name="human"):
         super().__init__(my_board, their_board, name)
-        ships = self.memory[self.THEIR_SHIPS]
-        for ship in ships:
-            print(f"{len(ship)=}, {ship.coords=}, {ship.front=}, {ship.body_dict=},{ship.direction=}")
-        print('ship lengths:')
-        [print(len(ship)) for ship in ships]
-        print('AI: my memory at __init__:', self.memory)
+        print("AI: my memory at __init__:", self.memory)
         self.cheat_move = self.cheat()
-        print('AI: Their board reveng?:\n', self.their_board_rev_eng.cells)
-
+        print("AI: Their board rev_eng?:\n", self.their_board_rev_eng.cells)
 
     def ask(self):
-        print('AI: my memory before before calculating move: \n', self.memory)
-        print('AI: their_board_rev_eng:]\n', self.their_board_rev_eng.cells)
-        print('AI:\n', self.their_board_rev_eng)
-        func = choices((self.smart_move, self.cheating), weights=(1, 2),k=1)[0]
+        print("AI.ask: my memory before before calculating move: \n", self.memory)
+        print("AI.ask: their_board_rev_eng:]\n", self.their_board_rev_eng.cells)
+        print("AI.ask:\n", self.their_board_rev_eng)
+        # self.try_reconstruct_their_board()
+        # board = self.try_reconstruct_their_board()
+        # print('AI.ask: imagined_board\n', board)
+        func = choices((self.smart_move, self.cheating), weights=(1, 0), k=1)[0]
         move = func()
-        print(f"hi from ask. The move should be {move}")
+        print(f"hi from ask. The move should be {move} from function {func.__name__}")
         return move
-    
 
     def smart_move(self):
         """реализация родительского метода-заглушки в классе AI"""
@@ -192,17 +199,25 @@ class AI(Player):
         # side = self.their_board.side
         self.allowed_moves = self.allowed_moves - self.fired_at
 
-        if self.recent_hit:
-            self.probable_hits = self.predict_set() - self.buffer_cells
-            # print(f"{self.recent_hit=}, {self.hits=}")
-            # print(f"{self.predict_set()=}")
-            # print(f"{self.buffer_cells=}")
-            self.probable_hits = self.probable_hits & self.allowed_moves
-            print(f"calculated moves:{self.probable_hits=}")
-            return choice(list(self.probable_hits))
-        else:
-            print(f"random move minus {self.buffer_cells=}")
-            return choice(list(self.allowed_moves - self.buffer_cells))
+        # if self.recent_hit:
+        #     self.probable_hits = self.predict_set() - self.buffer_cells
+        #     # print(f"{self.recent_hit=}, {self.hits=}")
+        #     # print(f"{self.predict_set()=}")
+        #     # print(f"{self.buffer_cells=}")
+        #     self.probable_hits = self.probable_hits & self.allowed_moves
+        #     print(f"calculated moves:{self.probable_hits=}")
+        #     return choice(list(self.probable_hits))
+        # else:
+        board = self.try_reconstruct_their_board()
+        print('Calculated move:else:\n', board)
+        possible_ships = [ship.coords for ship in board.ships]         
+        # possible_ships = 
+        # print(f"random move minus {self.buffer_cells=}")
+        # return choice(list(self.allowed_moves - self.buffer_cells))
+        print('calculated_move: prediction:', possible_ships)
+        mv = min(possible_ships, key=len)[0]
+        print("mv:", mv)
+        return mv
 
     def cheating(self):
         print("I'm cheating!")
@@ -217,16 +232,43 @@ class AI(Player):
         # print(self.their_board.ship_sets)
         # print(self.their_board.ships)
         return (
-            cell for cells 
-            in sorted(self.their_board.ship_sets, key=len, reverse=True)
+            cell for cells in sorted(self.their_board.ship_sets, key=len, reverse=True)
             for cell in cells
         )
 
-
-# def get_diagonal_cells(self, cell):
-#     return [
-#         (cell[0] - 1, cell[1] - 1),
-#         (cell[0] - 1, cell[1] + 1),
-#         (cell[0] + 1, cell[1] - 1),
-#         (cell[0] + 1, cell[1] + 1),
-#         ]
+    def try_reconstruct_their_board(self):
+        board = b.Board('opponent_variant', 
+                        side=self.my_board.side, )
+                        # sample=self.their_board_rev_eng.cells)
+        # print(f"{board.cells.keys()}")
+        # print('try_recon...:\n', self.their_board_rev_eng)
+        # board.cells = self.their_board_rev_eng.cells.copy()
+        for cell in self.their_board_rev_eng.cells:  
+            value = self.their_board_rev_eng.cells[cell]          
+            if value in [g.BUFFER, g.MISS, g.SUNKEN]:
+                board.cells[cell] = g.HIDDEN_BUFFER
+                # print('try_recons...:if:cell, cell value', cell, self.their_board_rev_eng.cells[cell] )
+            # elif self.their_board_rev_eng.cells[cell] == g.BUFFER:
+                # board.cells[cell] = 'B' 
+            elif value == g.HIT:
+                print('====================HIT!!!===========', cell)
+                board.cells[cell] = value      
+                board.cells[cell] = g.EMPTY      # TEMPORARY HAСЛ!!!!!!!!
+                # raise ValueError('I was hit!')
+            else: 
+                # print(f'hi from else, {cell=}')
+                board.cells[cell] = g.EMPTY
+                # board.cells[cell] = g.UNKNOWN
+                # board.cells[cell] = 'o'
+            #     board.cells[cell] = self.their_board_rev_eng.cells[cell]
+        lengths = self.memory[self.THEIR_SHIPS]
+        # print('try_reconstruct...:\n', board)
+        ships = []
+        for length in lengths:
+            ship = Ship(length)
+            ships.append(ship)
+        # print('Try..:\n', ships)
+        board.place_ships(ships, show=True)
+        return board
+    
+    

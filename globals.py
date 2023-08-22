@@ -1,6 +1,7 @@
 from itertools import zip_longest
 
 # EMPTY = 'О'
+ANCOR = '⚓'
 EMPTY = " "
 BODY = "■"
 SUNKEN = "‡"
@@ -8,9 +9,13 @@ HIT = "†"  # '*' #"‡"
 MISS = "-"
 UNKNOWN = "?"
 BUFFER = "·"
+HIDDEN_BUFFER = 'B' #to be hidden, not for display
 INP_INVITE = "\n?--> "
 QUIT = ["Q", "q", "Й", "й", "quit", "QUIT"]
 MOVE_DICT = {MISS: "мимо", HIT: "попал", SUNKEN: "подбит вражеский корабль длины "}
+HORIZ = 'h'
+VERT = 'v'
+DIRECTIONS = [HORIZ, VERT]
 
 
 def to_lines_by_limit(string, limit=60):

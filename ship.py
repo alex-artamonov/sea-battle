@@ -16,7 +16,7 @@ class Ship:
         - is_afloat: True если на плаву. False если подбит
     """
 
-    def __init__(self, length, direction="H", front=(), max_len=4):
+    def __init__(self, length, direction=g.HORIZ, front=(), max_len=4):
         self.front = front
         self.direction = direction
         # self.board_size = board_size
@@ -24,7 +24,6 @@ class Ship:
         self._len = length
         self.body_dict = {}
 
-   
     def __len__(self):
         return self._len
 
@@ -32,9 +31,9 @@ class Ship:
     def coords(self):
         lst = []
         for i, cell in enumerate(range(self._len)):
-            if self.direction == "H":
+            if self.direction == g.HORIZ:
                 lst.append((self.front[0], self.front[1] + i))
-            elif self.direction == "V":
+            elif self.direction == g.VERT:
                 lst.append((self.front[0] + i, self.front[1]))
             else:
                 raise ValueError("Введено неправильное направление корабля!")
@@ -42,18 +41,19 @@ class Ship:
 
     @property
     def coords_set(self):
-        if self.direction == "H":
-            return {
-                (self.front[0], self.front[1] + i)
-                for i, cell in enumerate(range(self._len))
-            }
-        elif self.direction == "V":
-            return {
-                (self.front[0] + i, self.front[1])
-                for i, cell in enumerate(range(self._len))
-            }
-        else:
-            raise ValueError("Введено неправильное направление корабля!")
+        return set(self.coords)
+    #     if self.direction == g.HORIZ:
+    #         return {
+    #             (self.front[0], self.front[1] + i)
+    #             for i, cell in enumerate(range(self._len))
+    #         }
+    #     elif self.direction == g.VERT:
+    #         return {
+    #             (self.front[0] + i, self.front[1])
+    #             for i, cell in enumerate(range(self._len))
+    #         }
+    #     else:
+    #         raise ValueError("Введено неправильное направление корабля!")
 
     @property
     def nbr_lives(self):
