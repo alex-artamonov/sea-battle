@@ -3,6 +3,7 @@ from random import choice
 import exceptions
 import globals as g
 from ship import Ship
+import math
 
 # BUFFER = g.BUFFER
 
@@ -36,6 +37,7 @@ class Board:
             self.cells = {(x, y): g.UNKNOWN for x in range(side) for y in range(side)}
         else:
             self.cells = sample.copy()
+            self.side = int(math.sqrt(len(sample)))
 
     # def copy(self, sample):
     #     side = sample.side
@@ -44,6 +46,22 @@ class Board:
     #     used_cells = sample.used_cells
     #     board = Board(side=side, player=player)
     #     self.cells.copy(sample.cells)
+
+    @property
+    def rows(self):
+        output = []
+        for i in range(self.side):
+                line = {(i, j): self.cells[(i, j)] for j in range(self.side)}
+                output.append(line)
+        return output
+    
+    @property
+    def columns(self):
+        output = []
+        for i in range(self.side):
+                line = {(j, i): self.cells[(j, i)] for j in range(self.side)}
+                output.append(line)
+        return output
 
     @property
     def ship_sets(self):

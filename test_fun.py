@@ -1,4 +1,4 @@
-import pytest
+# import pytest
 import scratch as s
 
 def test_contin_right():

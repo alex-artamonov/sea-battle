@@ -434,7 +434,7 @@ for i, lst in enumerate(spaces):
     spaces[i] = sorted(lst)
 # print(spaces)
 # [print(space) for space in spaces if len(space) >= length]
-print(spaces)
+# print(spaces)
 # spaces = find_spaces(dct, lines_dict, g.VERT)
 # print(spaces)
 # # print([(cell, dct[cell]) for line in lines_dict[g.HORIZ] for cell in line])
@@ -453,16 +453,23 @@ exact_spaces = []
 line = [(3, 0), (3, 1), (3, 2), (3, 3)]
 for i, ele in enumerate(line):
     space = line[i:i + target]
-    print(space)
+    # print(space)
     if len(space) == target:
         exact_spaces.append(space)
            
-print(exact_spaces)
-for space in exact_spaces:
-    print(is_line_continuous(space))
+# print(exact_spaces)
+# for space in exact_spaces:
+#     print(is_line_continuous(space))
     
 
 side = 3
 dct = build_lines_dict(side)
-for direction in dct:
-    print(dct[direction])
+# print(dct)
+# for direction in dct:
+#     print(dct[direction])
+
+from board import Board
+
+brd = Board('xxxx', 4)
+print(brd.rows)
+print(brd.columns)

@@ -183,7 +183,7 @@ class AI(Player):
         # self.try_reconstruct_their_board()
         # board = self.try_reconstruct_their_board()
         # print('AI.ask: imagined_board\n', board)
-        func = choices((self.smart_move, self.cheating), weights=(1, 0), k=1)[0]
+        func = choices((self.smart_move, self.cheating), weights=(1, 1), k=1)[0]
         move = func()
         print(f"hi from ask. The move should be {move} from function {func.__name__}")
         return move
