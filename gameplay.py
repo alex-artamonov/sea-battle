@@ -17,7 +17,7 @@ fleet_dict = {4:1, 3: 2, 2: 3, 1: 3}  # type of ship: ship count
 fleet_dict = {3: 1, 1: 2}  # type of ship: ship count
 ship_count = sum(fleet_dict.values())
 last_time_began = None
-gameplay_dict = {COMPUTER: "Computer", HUMAN: "human", FIELD_SIZE: 4}
+gameplay_dict = {COMPUTER: "Computer", HUMAN: "human", FIELD_SIZE: 3}
 
 
 def greeting():

@@ -10,6 +10,7 @@ import math
 
 LOWER_LIMIT = 2
 UPPER_LIMIT = 20
+MAX_ATTEMPTS = 100
 
 # ========================================================================
 class Board:
@@ -127,14 +128,54 @@ class Board:
             else:
                 continue
 
+    def place_ship(self, ship: Ship):
+        def finalize_place():
+            bs = ship.buffer_cells_set
+            cs = self.coords_set
+            for coord in ship.coords:
+                self.cells[coord], ship.body_dict[(coord)] = g.BODY, g.BODY
+                _set = cs & bs
+                # отрисовка невидимой буферной зоны по контуру корабля
+                for buffer_coord in _set:
+                    self.cells[buffer_coord] = g.HIDDEN_BUFFER
+            self.ships.append(ship)
+        def options(dct: dict):
+            output = []
+            lst = sorted(dct.keys())
+            if len(ship) > len(lst):
+                return output
+            for i in range(len(lst) - len(ship) + 1):
+                output.append(lst[i:len(ship) + i])
+            return output
+
+        lines_list = self.rows + self.columns
+        # print(lines_list)
+        variants = []
+        for ele in lines_list:
+        #     s = ''.join(s for s in ele.values())
+            lines = options(ele)
+            for line in lines:
+                s = ''.join(ele[cell] for cell in line)
+                # print(s, line)        
+                if str(ship) in s or str(ship)[::-1] in s:
+                    variants.append(line)
+        if not variants:
+            return False
+        else:
+        # print(variants)
+            ship.coords = choice(variants)
+            finalize_place()
+            return True
+
     def try_place_ships(self, ships):
         """размещает все корабли на поле"""
-        self.ship_list = ships
+        self.ship_list = sorted(ships, key=len, reverse=True)
         count = 0
         for i, ship in enumerate(ships):
             if self.place_ship(ship):
                 count += 1
             else:
+                print(self)
                 print('try_place_ships:before exception:\n', self.cells)
                 raise exceptions.NoVacantCells(
                     f"Нет свободного места для размещения корабля №{i + 1}!"
@@ -149,7 +190,10 @@ class Board:
         while True:
             try:
                 number_of_attempts += 1
+                if number_of_attempts == MAX_ATTEMPTS:
+                    break
                 self.try_place_ships(ships)
+
             except (exceptions.FailedToPlaceAllShips, exceptions.NoVacantCells) as e:
                 print('!!!!!!!!!!!!!!!!The board was cleared!!!!!!!!')
                 print(e)
@@ -159,6 +203,7 @@ class Board:
                 print(e)
                 continue
             else:
+                print('place_ships:number_of_attempts:', number_of_attempts)
                 return True
 
     def clear(self):
@@ -166,7 +211,8 @@ class Board:
         for ship in self.ships:
             ship.clear()
         for cell in self.cells:
-            self.cells[cell] = g.EMPTY
+            # self.cells[cell] = g.EMPTY
+            self.cells[cell] = g.UNKNOWN
 
 
     def __repr__(self):

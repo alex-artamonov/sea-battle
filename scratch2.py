@@ -1,5 +1,7 @@
 import globals as g
 from board import Board
+from ship import Ship
+from random import choice
 
 div = '|'
 inner =  []
@@ -54,22 +56,42 @@ print(brd)
 # for line in brd.columns:
 #     print([c for c in line.values()])
 
-ship = 'X?'
+ship = '??'
 
-lines_list = brd.rows + brd.columns
-# print(lines_list)
-output = []
-for ele in lines_list:
-#     s = ''.join(s for s in ele.values())
-    lines = options(ele, len(ship))
-    for line in lines:
-        s = ''.join(ele[cell] for cell in line)
-        # print(s, line)        
-        if ship in s:
-            output.append(line)
+def place_ship(ship: Ship):
+    def options(dct: dict):
+        output = []
+        lst = sorted(dct.keys())
+        if len(ship) > len(lst):
+            return output
+        for i in range(len(lst) - len(ship) + 1):
+            output.append(lst[i:len(ship) + i])
+        return output
 
-print(ship, len(output))
-print(output)
+    lines_list = brd.rows + brd.columns
+    # print(lines_list)
+    variants = []
+    for ele in lines_list:
+    #     s = ''.join(s for s in ele.values())
+        lines = options(ele)
+        for line in lines:
+            s = ''.join(ele[cell] for cell in line)
+            # print(s, line)        
+            if str(ship) in s or str(ship)[::-1] in s:
+                variants.append(line)
+    # print(variants)
+    return choice(variants)
+
+# output = set(set(ele) for ele in output)
+# print(ship, len(output))
+# print(output)
 # print(len(output))
 # for ele in brd.rows:
 #     print(options(ele, 4))
+
+# def ship_combinations(field: Board, ship: str):
+
+ship = Ship(3)
+print(ship, len(ship))
+
+print(place_ship(ship))
