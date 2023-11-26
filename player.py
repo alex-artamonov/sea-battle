@@ -145,11 +145,13 @@ class AI(Player):
         # self.memory = dict(their_ships = [], my_moves = [])
         ships = their_board.ship_list
         for ship in ships:
-            print(f"{len(ship)=}, {ship.coords=}, {ship.front=}, {ship.body_dict=},{ship.direction=}")
-        print('ship lengths:')
+            print(
+                f"{len(ship)=}, {ship.coords=}, {ship.front=}, {ship.body_dict=},{ship.direction=}"
+            )
+        print("ship lengths:")
         [print(len(ship)) for ship in ships]
-        self.memory = dict(their_ships = ships)
-        print('my memory:', self.memory)
+        self.memory = dict(their_ships=ships)
+        print("my memory:", self.memory)
         self.cheat_move = self.cheat()
 
     def ask(self):
@@ -161,7 +163,7 @@ class AI(Player):
         #     print('even')
         #     move = self.cheating()
         #
-        fun = choices((self.smart_move, self.cheating), weights=(1, 9),k=1)[0]
+        fun = choices((self.smart_move, self.cheating), weights=(1, 9), k=1)[0]
         move = fun()
         print(f"hi from ask. The move should be {move}")
         return move
@@ -202,8 +204,8 @@ class AI(Player):
         # print(self.their_board.ship_sets)
         # print(self.their_board.ships)
         return (
-            cell for cells 
-            in sorted(self.their_board.ship_sets, key=len, reverse=True)
+            cell
+            for cells in sorted(self.their_board.ship_sets, key=len, reverse=True)
             for cell in cells
         )
 

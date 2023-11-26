@@ -26,7 +26,6 @@ class Ship:
         self.len = length
         self.body_dict = {}
 
-   
     def __len__(self):
         return self._len
 
@@ -42,7 +41,6 @@ class Ship:
             )
         else:
             self._len = value
-        
 
     @property
     def coords(self):
